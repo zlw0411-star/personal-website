@@ -5,16 +5,16 @@
  * License: MIT; full text at vendor/react-resume-template/LICENSE
  */
 import Link from "next/link";
-import { LockKeyhole } from "lucide-react";
 import type { Profile } from "@/lib/content-types";
 
 const navigation = [
-  { label: "首页", href: "/" },
-  { label: "经历", href: "/experience" },
-  { label: "生活", href: "/life" },
+  { label: "首页", href: "/", section: "home" as const },
+  { label: "项目", href: "/projects", section: "projects" as const },
+  { label: "经历", href: "/experience", section: "experience" as const },
+  { label: "关于", href: "/about", section: "about" as const },
 ];
 
-export default function Header({ profile, currentSection }: { profile: Profile; currentSection: "home" | "experience" | "life" }) {
+export default function Header({ profile, currentSection }: { profile: Profile; currentSection: "home" | "projects" | "experience" | "about" | "life" }) {
   return <header className="rr-header">
     <div className="rr-header-inner">
       <Link className="rr-brand" href="/" aria-label={`${profile.siteName}，首页`}>
@@ -23,10 +23,9 @@ export default function Header({ profile, currentSection }: { profile: Profile; 
       </Link>
       <nav aria-label="主导航" className="rr-main-nav">
         {navigation.map(item => {
-          const section = item.href === "/" ? "home" : item.href === "/life" ? "life" : "experience";
-          const active = section === currentSection;
+          const active = item.section === currentSection;
           return <Link className="rr-nav-link" href={item.href} key={item.href} aria-current={active ? "page" : undefined}>
-            {item.label}{item.href === "/life" && <LockKeyhole className="rr-nav-lock" size={13} aria-hidden="true" />}
+            {item.label}
           </Link>;
         })}
       </nav>

@@ -1,13 +1,12 @@
 import { CATEGORIES, type EntryInput, type Profile, type RichDoc, type RichNode } from "@/lib/content-types";
 import { isAdminAuthenticated } from "@/lib/server/admin-auth";
+import { isAdminOriginAllowed, requestOrigin } from "@/lib/server/runtime-config";
 import { parseContacts } from "@/lib/contact-utils";
 
 export function json(data: unknown, status = 200, headers: HeadersInit = {}) { return Response.json(data, { status, headers: { "Cache-Control": "no-store", ...headers } }); }
 export function error(message: string, status = 400, headers: HeadersInit = {}) { return json({ error: message }, status, headers); }
 export function adminAllowed(request: Request) {
-  const dev = (import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV === true;
-  if (!dev) return false;
-  try { return ["localhost", "127.0.0.1", "::1", "[::1]"].includes(new URL(request.url).hostname); } catch { return false; }
+  return isAdminOriginAllowed(requestOrigin(request));
 }
 export function adminMutationAllowed(request: Request) {
   return adminAllowed(request) && sameOriginMutation(request);

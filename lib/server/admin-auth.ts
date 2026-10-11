@@ -3,6 +3,7 @@ import { and, eq, gt, lte } from "drizzle-orm";
 import { env } from "cloudflare:workers";
 import { getDb } from "@/db";
 import { adminSecurity, adminSessions } from "@/db/schema";
+import { initializeSecurityIfNeeded } from "@/lib/server/initial-security";
 
 const ALGORITHM = "scrypt-N32768-r8-p3-v1";
 const SESSION_SECONDS = 12 * 60 * 60;
@@ -18,6 +19,7 @@ function parseToken(cookieHeader: string | null): string | null {
   return value && /^[0-9a-f]{64}$/i.test(value) ? value.toLowerCase() : null;
 }
 async function getSecurity() {
+  await initializeSecurityIfNeeded();
   const [row] = await getDb().select().from(adminSecurity).where(eq(adminSecurity.id, 1)).limit(1);
   return row ?? null;
 }

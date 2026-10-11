@@ -3,6 +3,7 @@ import { and, eq, gt, lte } from "drizzle-orm";
 import { env } from "cloudflare:workers";
 import { getDb } from "@/db";
 import { lifeSecurity, lifeSessions } from "@/db/schema";
+import { initializeSecurityIfNeeded } from "@/lib/server/initial-security";
 
 const ALGORITHM = "scrypt-N32768-r8-p3-v1";
 const SESSION_SECONDS = 12 * 60 * 60;
@@ -27,6 +28,7 @@ function getCookieToken(cookieHeader: string | null): string | null {
 }
 function hashToken(token: string): string { return createHash("sha256").update(token, "utf8").digest("hex"); }
 async function getSecurity() {
+  await initializeSecurityIfNeeded();
   const [row] = await getDb().select().from(lifeSecurity).where(eq(lifeSecurity.id, 1)).limit(1);
   return row ?? null;
 }

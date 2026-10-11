@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" fill="none">
+  <defs>
+    <linearGradient id="sky" x1="180" y1="40" x2="1420" y2="1060" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#182922"/>
+      <stop offset=".52" stop-color="#30463b"/>
+      <stop offset="1" stop-color="#526a59"/>
+    </linearGradient>
+    <linearGradient id="ridge-back" x1="800" y1="360" x2="800" y2="1000" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#506557"/>
+      <stop offset="1" stop-color="#354a3e"/>
+    </linearGradient>
+    <linearGradient id="ridge-front" x1="810" y1="570" x2="810" y2="1000" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3b5244"/>
+      <stop offset="1" stop-color="#263a30"/>
+    </linearGradient>
+    <radialGradient id="haze" cx="0" cy="0" r="1" gradientTransform="matrix(0 420 -760 0 820 410)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#a7b69b" stop-opacity=".24"/>
+      <stop offset="1" stop-color="#a7b69b" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <path fill="url(#sky)" d="M0 0h1600v1000H0z"/>
+  <path fill="url(#haze)" d="M0 0h1600v1000H0z"/>
+  <path fill="url(#ridge-back)" d="m0 631 134-101 94 48 169-192 120 137 123-88 98 91 177-205 158 178 107-79 119 126 137-108 169 100v462H0V631Z"/>
+  <path fill="#627365" fill-opacity=".55" d="m397 386 120 137-70-48-50 29-58-40 58-78Zm512-65 158 178-91-53-53 30-75-54 61-101Zm520 66 169 100-100-25-65 28-73-55 69-48Z"/>
+  <path fill="url(#ridge-front)" d="m0 753 160-81 135 75 154-110 132 79 143-121 158 126 124-79 128 85 148-101 166 66 122-63v251H0V753Z"/>
+  <path fill="#1d3027" fill-opacity=".58" d="M0 850c174-49 324-24 469 24 160 53 284 38 443-10 244-73 469-40 688 30v106H0V850Z"/>
+  <g fill="#e3eadc" fill-opacity=".55">
+    <circle cx="255" cy="210" r="2"/><circle cx="342" cy="142" r="1.5"/><circle cx="1290" cy="192" r="2"/>
+    <circle cx="1184" cy="274" r="1.5"/><circle cx="1404" cy="350" r="1.5"/><circle cx="474" cy="294" r="1.3"/>
+    <circle cx="1045" cy="124" r="1.4"/><circle cx="710" cy="230" r="1.2"/>
+  </g>
+</svg>

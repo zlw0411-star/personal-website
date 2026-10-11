@@ -23,7 +23,7 @@ export default function EntryEditor({id,initialCategory="learning"}:{id?:string;
  const router=useRouter(); const initialForm=blank(id?"learning":initialCategory);const [form,setForm]=useState<EntryInput>(initialForm),[loading,setLoading]=useState(Boolean(id)),[loadFailed,setLoadFailed]=useState(false),[error,setError]=useState(""),[saving,setSaving]=useState(false),[uploads,setUploads]=useState(0),[cover,setCover]=useState(""),[saved,setSaved]=useState(false),[,refresh]=useState(0);
  const baseline=useRef(id?"":stringify({...initialForm,body:canonicalDoc(EMPTY_DOC)})); const stateRef=useRef({saving:false,uploads:0,dirty:false});
  const bodyFile=useRef<HTMLInputElement>(null),coverFile=useRef<HTMLInputElement>(null);
- const editor=useEditor({extensions:[StarterKit,MediaImage.configure({inline:false,allowBase64:false})],content:EMPTY_DOC,immediatelyRender:false,editorProps:{attributes:{role:"textbox","aria-label":"正文编辑区","aria-multiline":"true"}},onUpdate:()=>{setSaved(false);setError("");refresh(n=>n+1)}});
+ const editor=useEditor({extensions:[StarterKit,MediaImage.configure({inline:false,allowBase64:false})],content:EMPTY_DOC,immediatelyRender:false,editorProps:{attributes:{role:"textbox","aria-label":"正文编辑区","aria-multiline":"true"}},onUpdate:()=>{setSaved(false);setError("");refresh(n=>n+1)},onSelectionUpdate:()=>refresh(n=>n+1)});
  const current=stringify({...form,body:canonicalDoc((editor?.getJSON()??form.body) as RichDoc)});
  const dirty=baseline.current!==""&&current!==baseline.current;
  const bodyLength=docTextLength((editor?.getJSON()??form.body) as RichDoc);

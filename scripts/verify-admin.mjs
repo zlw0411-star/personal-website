@@ -67,8 +67,10 @@ try {
   const entryId = createBody.entry.id; entries.add(entryId);
   const list = await json(await request("/api/admin/entries"));
   await check(list.entries?.some((entry) => entry.id === entryId), "authenticated admin can list entries");
+  const listedEntry = list.entries?.find((entry) => entry.id === entryId);
+  await check(listedEntry && !Object.hasOwn(listedEntry, "body"), "admin entry list omits rich-text body payloads");
   const detail = await json(await request(`/api/admin/entries/${entryId}`));
-  await check(detail.entry?.id === entryId, "authenticated admin can read an entry");
+  await check(detail.entry?.id === entryId && detail.entry.body?.type === "doc", "authenticated admin entry detail still includes the full body");
   const update = await request(`/api/admin/entries/${entryId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload(`${titlePrefix} updated`, "draft", mediaId)), write: true });
   await check(update.ok && (await json(update)).entry?.title === `${titlePrefix} updated`, "authenticated admin can update its fixture entry");
   const adminMedia = await request(`/api/admin/media/${mediaId}`);

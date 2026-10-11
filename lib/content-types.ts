@@ -29,6 +29,7 @@ export type Entry = EntryInput & {
   updatedAt: string;
   publishedAt: string | null;
 };
+export type EntrySummary = Omit<Entry, "body">;
 export type Profile = {
   siteName: string;
   nickname: string;
@@ -45,6 +46,7 @@ export type ProfileGeneration = {
   experience: string;
   sources: { id: string; title: string; category: Category; status: PublishStatus; visibility: Visibility }[];
   counts: { experience: number; life: number };
+  omittedCount: number;
   weights: { experience: 3; life: 1 };
 };
 export type MediaUpload = { id: string; url: string; adminUrl: string };

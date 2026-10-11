@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { CATEGORY_INFO, type Category, type Entry, formatDate } from "@/lib/content-types";
+import { CATEGORY_INFO, type Category, type EntrySummary, formatDate } from "@/lib/content-types";
 import styles from "./admin.module.css";
 
 type CategoryTab = "all" | "learning" | "life";
 
 export default function EntryList() {
-  const [entries, setEntries] = useState<Entry[]>([]);
+  const [entries, setEntries] = useState<EntrySummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
   const [error, setError] = useState("");
@@ -25,7 +25,7 @@ export default function EntryList() {
     setError("");
     try {
       const response = await fetch("/api/admin/entries");
-      const data = await response.json() as { entries?: Entry[]; error?: string };
+      const data = await response.json() as { entries?: EntrySummary[]; error?: string };
       if (!response.ok) throw new Error(data.error || "暂时无法读取内容，请重试。");
       setEntries(data.entries || []);
     } catch (cause) {
@@ -48,7 +48,7 @@ export default function EntryList() {
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   }, [entries, category, state, visibility, search]);
 
-  async function remove(entry: Entry) {
+  async function remove(entry: EntrySummary) {
     if (busyIdsRef.current.has(entry.id)) return;
     if (!window.confirm(`确定删除「${entry.title || "未命名内容"}」吗？此操作无法撤销。`)) return;
     busyIdsRef.current.add(entry.id);

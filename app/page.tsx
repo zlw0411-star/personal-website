@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   const profile = (await getProfile().catch(() => DEFAULT_PROFILE)) ?? DEFAULT_PROFILE;
   const isPlaceholderAbout = profile.about.trim() === DEFAULT_PROFILE.about.trim();
+  const isPlaceholderBio = profile.bio.trim() === DEFAULT_PROFILE.bio.trim();
   const aboutParagraphs = isPlaceholderAbout ? [] : profile.about.split(/\n+/).map(value => value.trim()).filter(Boolean);
   const contacts = profileContacts(profile).filter(contact => contact.value.trim());
 
@@ -38,7 +39,7 @@ export default async function Home() {
     <section className="home-hero" aria-labelledby="home-title">
       <div className="home-profile-copy">
         <h1 id="home-title">你好，我是<br /><span>{profile.nickname}。</span></h1>
-        {profile.bio.trim() && <p className="home-bio">{profile.bio}</p>}
+        {!isPlaceholderBio && profile.bio.trim() && <p className="home-bio">{profile.bio}</p>}
         {aboutParagraphs.length > 0 && <div className="home-about">{aboutParagraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div>}
       </div>
       <div className="home-profile-media"><img src={profile.avatarId ? `/api/media/${encodeURIComponent(profile.avatarId)}` : "/avatar-placeholder.svg"} alt={`${profile.nickname}的头像`} /></div>

@@ -27,9 +27,9 @@ function block(node: RichNode, key: number, admin: boolean): React.ReactNode {
   const children = (node.content ?? []).map((n, i) => n.type === "text" || n.type === "hardBreak" ? inline(n, i) : block(n, i, admin));
   switch (node.type) {
     case "paragraph": return <p key={key}>{children}</p>;
-    case "heading": { const level = Math.min(3, Math.max(1, Number(node.attrs?.level) || 2)); const Tag = `h${level}` as "h1" | "h2" | "h3"; return <Tag key={key}>{children}</Tag>; }
+    case "heading": { const level = Math.min(3, Math.max(1, Number(node.attrs?.level) || 2)) + 1; const Tag = `h${level}` as "h2" | "h3" | "h4"; return <Tag key={key}>{children}</Tag>; }
     case "bulletList": return <ul key={key}>{children}</ul>;
-    case "orderedList": return <ol key={key}>{children}</ol>;
+    case "orderedList": { const requestedStart = Number(node.attrs?.start); const start = Number.isSafeInteger(requestedStart) && requestedStart >= 1 && requestedStart <= 10000 ? requestedStart : 1; return <ol key={key} start={start}>{children}</ol>; }
     case "listItem": return <li key={key}>{children}</li>;
     case "blockquote": return <blockquote key={key}>{children}</blockquote>;
     case "codeBlock": return <pre key={key}><code>{(node.content ?? []).map(n => n.text ?? "").join("")}</code></pre>;

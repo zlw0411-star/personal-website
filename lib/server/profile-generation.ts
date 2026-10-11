@@ -35,16 +35,20 @@ function excerpt(value: string, budget: number): string {
     if (prefix.length + character.length > budget - 1) break;
     prefix += character;
   }
-  return `${prefix.trimEnd()}…`;
+  const trimmedPrefix = prefix.trimEnd();
+  return trimmedPrefix ? `${trimmedPrefix}…` : "";
 }
 
 function representative(entry: Entry): string {
   return splitSentences(extractEntryText(entry))[0] ?? "";
 }
 
-function roundRobinAbout(entries: Entry[], budget: number, allowExperienceTitle = false): string[] {
-  const candidates = entries.map((entry) => representative(entry) || (allowExperienceTitle ? entry.title.trim() : "")).filter(Boolean).slice(0, MAX_ABOUT_ITEMS);
+type GeneratedText = { text: string; sourceIds: string[] };
+
+function roundRobinAbout(entries: Entry[], budget: number, allowExperienceTitle = false): GeneratedText {
+  const candidates = entries.map((entry) => ({ entry, text: representative(entry) || (allowExperienceTitle ? entry.title.trim() : "") })).filter((candidate) => candidate.text).slice(0, MAX_ABOUT_ITEMS);
   const selected: string[] = [];
+  const sourceIds: string[] = [];
   let used = 0;
   for (let index = 0; index < candidates.length; index++) {
     const candidate = candidates[index];
@@ -53,20 +57,22 @@ function roundRobinAbout(entries: Entry[], budget: number, allowExperienceTitle 
     if (remaining <= 0) break;
     const remainingCandidates = candidates.length - index;
     const quota = Math.max(1, Math.floor(remaining / remainingCandidates));
-    const picked = excerpt(candidate, quota);
+    const picked = excerpt(candidate.text, quota);
     if (!picked) continue;
     selected.push(picked);
+    sourceIds.push(candidate.entry.id);
     used += separator + picked.length;
   }
-  return selected;
+  return { text: selected.join("\n"), sourceIds };
 }
 
-function overview(entries: Entry[]): string {
-  const candidates = entries.map((entry) => ({ title: entry.title.trim(), text: representative(entry) })).filter((entry) => entry.title || entry.text).slice(0, MAX_OVERVIEW_ITEMS);
+function overview(entries: Entry[]): GeneratedText {
+  const candidates = entries.map((entry) => ({ entry, title: entry.title.trim(), text: representative(entry) })).filter((candidate) => candidate.title || candidate.text).slice(0, MAX_OVERVIEW_ITEMS);
   const lines: string[] = [];
+  const sourceIds: string[] = [];
   let used = 0;
   for (let index = 0; index < candidates.length; index++) {
-    const { title, text } = candidates[index];
+    const { entry, title, text } = candidates[index];
     const remaining = EXPERIENCE_OVERVIEW_BUDGET - used;
     if (remaining <= 0) break;
     const remainingItems = candidates.length - index;
@@ -80,33 +86,40 @@ function overview(entries: Entry[]): string {
     const separator = lines.length ? 1 : 0;
     if (used + separator + line.length > EXPERIENCE_OVERVIEW_BUDGET) break;
     lines.push(line);
+    sourceIds.push(entry.id);
     used += separator + line.length;
   }
-  return lines.join("\n");
+  return { text: lines.join("\n"), sourceIds };
 }
 
 export function generateProfile(entries: Entry[]): ProfileGeneration {
   const experienceEntries = entries.filter((entry) => entry.category !== "life");
   const lifeEntries = entries.filter((entry) => entry.category === "life");
   const aboutExperience = roundRobinAbout(experienceEntries, ABOUT_EXPERIENCE_BUDGET, true);
-  const experienceLength = aboutExperience.reduce((sum, value) => sum + value.length, 0);
-  const lifeBudget = aboutExperience.length
+  const experienceLength = aboutExperience.text.split("\n").reduce((sum, value) => sum + value.length, 0);
+  const lifeBudget = aboutExperience.text
     ? Math.floor(experienceLength / 3)
     : Math.min(ABOUT_LIFE_BUDGET, lifeEntries.some((entry) => representative(entry)) ? ABOUT_LIFE_BUDGET : 0);
   const aboutLife = roundRobinAbout(lifeEntries, lifeBudget);
-  const about = [...aboutExperience, ...aboutLife].join("\n");
+  const generatedOverview = overview(experienceEntries);
+  const usedIds = new Set([...aboutExperience.sourceIds, ...aboutLife.sourceIds, ...generatedOverview.sourceIds]);
+  const sources = entries.filter((entry) => usedIds.has(entry.id));
 
   return {
-    about,
-    experience: overview(experienceEntries),
-    sources: entries.map((entry) => ({
+    about: [aboutExperience.text, aboutLife.text].filter(Boolean).join("\n"),
+    experience: generatedOverview.text,
+    sources: sources.map((entry) => ({
       id: entry.id,
       title: entry.title,
       category: entry.category,
       status: entry.status,
       visibility: entry.visibility,
     })),
-    counts: { experience: experienceEntries.length, life: lifeEntries.length },
+    counts: {
+      experience: sources.filter((entry) => entry.category !== "life").length,
+      life: sources.filter((entry) => entry.category === "life").length,
+    },
+    omittedCount: entries.length - sources.length,
     weights: { experience: 3, life: 1 },
   };
 }

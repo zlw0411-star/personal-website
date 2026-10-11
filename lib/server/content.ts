@@ -1,6 +1,6 @@
 import { and, desc, eq, inArray, ne, or } from "drizzle-orm";
 import { getDb } from "@/db";
-import { DEFAULT_PROFILE, type Category, type Entry, type EntryInput, type Profile, type RichDoc, type RichNode } from "@/lib/content-types";
+import { DEFAULT_PROFILE, type Category, type Entry, type EntryInput, type EntrySummary, type Profile, type RichDoc, type RichNode } from "@/lib/content-types";
 import { entries, entryMedia, media, profile } from "@/db/schema";
 
 function decode(row: typeof entries.$inferSelect): Entry {
@@ -37,8 +37,19 @@ export async function getEntryAccessKind(id: string): Promise<"life" | "other" |
   if (row.visibility !== "public") return null;
   return "other";
 }
-export async function listAdminEntries(): Promise<Entry[]> {
-  return (await getDb().select().from(entries).orderBy(desc(entries.updatedAt))).map(decode);
+export async function listAdminEntries(): Promise<EntrySummary[]> {
+  const rows = await getDb().select({
+    id: entries.id, category: entries.category, title: entries.title, summary: entries.summary,
+    coverId: entries.coverId, status: entries.status, visibility: entries.visibility,
+    projectUrl: entries.projectUrl, repositoryUrl: entries.repositoryUrl,
+    createdAt: entries.createdAt, updatedAt: entries.updatedAt, publishedAt: entries.publishedAt,
+  }).from(entries).orderBy(desc(entries.updatedAt));
+  return rows.map((row) => ({
+    ...row,
+    category: (row.category === "project" ? "learning" : row.category) as Category,
+    status: row.status as Entry["status"],
+    visibility: row.visibility as Entry["visibility"],
+  }));
 }
 export async function getAdminEntry(id: string): Promise<Entry | null> {
   const [row] = await getDb().select().from(entries).where(eq(entries.id, id)).limit(1);

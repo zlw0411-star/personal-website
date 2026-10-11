@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./portfolio.css";
 
 export const metadata: Metadata = {
   title: { default: "个人作品集", template: "%s · 个人作品集" },

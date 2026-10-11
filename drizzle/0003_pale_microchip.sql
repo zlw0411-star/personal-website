@@ -1,0 +1,1 @@
+ALTER TABLE `profile` ADD `contacts` text DEFAULT '[]' NOT NULL;

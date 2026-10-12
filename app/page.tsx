@@ -21,7 +21,7 @@ export default async function Home() {
         <div>
           <p className="portfolio-kicker">SELECTED WORK</p>
           <h2 id="featured-projects-title">精选项目</h2>
-          <p>挑选少量最能代表不同能力方向的项目：真实硬件实践、完整 Web 工程和个人创意应用。</p>
+          <p>精选 Java 全栈业务工程与智能硬件实践，呈现从业务流程到软硬件协作的项目经验。</p>
         </div>
         <Link className="portfolio-heading-link" href="/projects">查看全部项目 <ArrowUpRight size={16} aria-hidden="true" /></Link>
       </Reveal>

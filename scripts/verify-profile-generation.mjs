@@ -27,16 +27,14 @@ const selected = [
 ];
 const generated = generateProfile(selected);
 assert.ok(generated.about.includes("甲校") && generated.about.includes("乙单位"), "about prioritizes experience representatives");
-assert.ok(generated.about.length <= 600 + 200 + 8, "about respects compact text budgets");
+assert.ok(generated.about.length <= 600, "about respects the experience text budget");
 assert.ok(generated.experience.includes("大学求学：") && generated.experience.includes("实习：") && generated.experience.includes("工作："), "experience overview is organized by entry title");
 assert.notEqual(generated.about, generated.experience, "about and experience overview serve distinct purposes");
 const experienceOnly = generateProfile(selected.filter((item) => item.category !== "life"));
-assert.ok(generated.about.startsWith(`${experienceOnly.about}\n`), "mixed about starts with the selected experience excerpt");
-const lifeExcerpt = generated.about.slice(experienceOnly.about.length).trim();
-assert.ok(lifeExcerpt.length > 0 && lifeExcerpt.length <= Math.floor(experienceOnly.about.length / 3), "life excerpt is present but no more than one third of experience text");
-assert.equal(generated.sources.length, selected.length);
-assert.deepEqual(generated.counts, { experience: 3, life: 1 });
-assert.deepEqual(generated.weights, { experience: 3, life: 1 });
+assert.equal(generated.about, experienceOnly.about, "life content never contributes to the generated introduction");
+assert.equal(generated.sources.length, 3);
+assert.deepEqual(generated.sources.map((source) => source.id), ["e1", "e2", "e3"]);
+assert.deepEqual(generated.counts, { experience: 3 });
 
 const long = generateProfile([entry({ id: "long", title: "一段长记录", summary: "甲".repeat(1000) })]);
 assert.ok(long.about.startsWith("甲".repeat(32)) && long.about.endsWith("…") && long.about.length === 600, "long unpunctuated text produces a marked excerpt");
@@ -52,52 +50,50 @@ const titleOnly = generateProfile([entry({ id: "title", title: "真实的岗位�
 assert.equal(titleOnly.experience, "真实的岗位记录", "a real title is retained without a dangling separator when body and summary are empty");
 const lifeOnly = generateProfile([entry({ id: "life", title: "生活", category: "life", summary: "记录周末散步和读书的日常。" })]);
 assert.equal(lifeOnly.experience, "");
-assert.ok(lifeOnly.about.includes("周末散步") && lifeOnly.about.length <= 180, "life-only selection produces a short introduction");
-assert.equal(lifeOnly.omittedCount, 0);
+assert.equal(lifeOnly.about, "", "life-only selection produces no introduction text");
+assert.deepEqual(lifeOnly.sources, [], "life entries never appear as generated sources");
+assert.equal(lifeOnly.omittedCount, 0, "disabled life records are outside the generation selection");
 const overflow = generateProfile([
   ...Array.from({ length: 10 }, (_, index) => entry({ id: `overflow-e${index}`, title: `经历${index}`, summary: `经历事实${index}。` })),
   ...Array.from({ length: 8 }, (_, index) => entry({ id: `overflow-l${index}`, title: `生活${index}`, category: "life", summary: String.fromCharCode(65 + index) })),
 ]);
 assert.equal(overflow.experience.split("\n").length, 8, "overview includes at most eight experience entries");
-assert.deepEqual(overflow.counts, { experience: 8, life: 6 }, "counts include only entries used in generated text");
-assert.deepEqual(overflow.sources.map((source) => source.id), [
-  ...Array.from({ length: 8 }, (_, index) => `overflow-e${index}`),
-  ...Array.from({ length: 6 }, (_, index) => `overflow-l${index}`),
-], "sources are the ordered union of entries included in about or overview");
-assert.equal(overflow.omittedCount, 4, "entries beyond excerpt limits or life budget are counted as omitted");
+assert.deepEqual(overflow.counts, { experience: 8 }, "generation counts include experience sources only");
+assert.deepEqual(overflow.sources.map((source) => source.id), Array.from({ length: 8 }, (_, index) => `overflow-e${index}`), "sources include experience entries only");
+assert.equal(overflow.omittedCount, 2, "only excess experience entries count as omitted");
 const emptyLifeRich = entry({ id: "empty-life", title: "只有图片和代码", category: "life", summary: "", content: [
   { type: "image", attrs: { alt: "图片不参与摘取" } },
   { type: "codeBlock", content: [{ type: "text", text: "代码不参与摘取" }] },
 ] });
 const emptyLife = generateProfile([emptyLifeRich]);
-assert.deepEqual(emptyLife.sources, [], "life entries with only excluded image/code text do not count as used");
-assert.deepEqual(emptyLife.counts, { experience: 0, life: 0 });
-assert.equal(emptyLife.omittedCount, 1);
+assert.deepEqual(emptyLife.sources, [], "life entries never count as generated sources");
+assert.deepEqual(emptyLife.counts, { experience: 0 });
+assert.equal(emptyLife.omittedCount, 0);
 const tinyLifeBudget = generateProfile([
   entry({ id: "tiny-e", title: "E", summary: "A" }),
   entry({ id: "tiny-l", title: "生活", category: "life", summary: "生活內容" }),
 ]);
-assert.equal(tinyLifeBudget.about, "A", "life excerpt is omitted when experience leaves less than one character of its 3:1 budget");
+assert.equal(tinyLifeBudget.about, "A", "life content does not affect the experience introduction");
 assert.deepEqual(tinyLifeBudget.sources.map((source) => source.id), ["tiny-e"]);
-assert.deepEqual(tinyLifeBudget.counts, { experience: 1, life: 0 });
-assert.equal(tinyLifeBudget.omittedCount, 1);
+assert.deepEqual(tinyLifeBudget.counts, { experience: 1 });
+assert.equal(tinyLifeBudget.omittedCount, 0);
 const multiShortExperience = generateProfile([
   ...Array.from({ length: 4 }, (_, index) => entry({ id: `short-e${index}`, title: `E${index}`, summary: "A" })),
   entry({ id: "short-life", title: "生活", category: "life", summary: "ZX" }),
 ]);
-assert.equal(multiShortExperience.about, "A\nA\nA\nA", "3:1 life budget excludes line separators from experience character count");
+assert.equal(multiShortExperience.about, "A\nA\nA\nA", "short experience excerpts are joined without life content");
 assert.deepEqual(multiShortExperience.sources.map((source) => source.id), ["short-e0", "short-e1", "short-e2", "short-e3"]);
-assert.deepEqual(multiShortExperience.counts, { experience: 4, life: 0 });
-assert.equal(multiShortExperience.omittedCount, 1);
+assert.deepEqual(multiShortExperience.counts, { experience: 4 });
+assert.equal(multiShortExperience.omittedCount, 0);
 const emojiFirstLife = generateProfile([
   ...Array.from({ length: 6 }, (_, index) => entry({ id: `emoji-e${index}`, title: `E${index}`, summary: "A" })),
   entry({ id: "emoji-life", title: "生活", category: "life", summary: "🙂x" }),
 ]);
-assert.equal(emojiFirstLife.about, "A\nA\nA\nA\nA\nA", "an excerpt budget too small for the first emoji contributes no ellipsis-only text");
+assert.equal(emojiFirstLife.about, "A\nA\nA\nA\nA\nA", "life content does not affect six experience excerpts");
 assert.ok(!emojiFirstLife.sources.some((source) => source.id === "emoji-life"));
-assert.deepEqual(emojiFirstLife.counts, { experience: 6, life: 0 });
-assert.equal(emojiFirstLife.omittedCount, 1);
-assert.deepEqual(generateProfile([]), { about: "", experience: "", sources: [], counts: { experience: 0, life: 0 }, omittedCount: 0, weights: { experience: 3, life: 1 } });
+assert.deepEqual(emojiFirstLife.counts, { experience: 6 });
+assert.equal(emojiFirstLife.omittedCount, 0);
+assert.deepEqual(generateProfile([]), { about: "", experience: "", sources: [], counts: { experience: 0 }, omittedCount: 0 });
 
 const contacts = parseContacts([
   { kind: "email", label: " 工作邮箱 ", value: " person@example.com " },
@@ -128,4 +124,4 @@ assert.ok(mergedContacts.some((contact) => contact.value === "https://example.co
 assert.ok(mergedContacts.some((contact) => contact.kind === "email" && contact.label === "旧邮箱" && contact.value === "other@example.com"), "simple legacy mailto values become email contacts");
 assert.ok(mergedContacts.some((contact) => contact.kind === "text" && contact.value === "mailto:other@example.com?subject=hello"), "legacy mailto query strings are preserved as text");
 
-console.log("✓ profile generation, weighting, rich-text filtering, empty states, and contact validation passed");
+console.log("✓ profile generation excludes life records; rich-text filtering, empty states, and contact validation passed");

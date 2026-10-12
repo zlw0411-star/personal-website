@@ -14,7 +14,6 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       <nav aria-label="管理导航" className={styles.nav}>
         <Link className={path === "/admin" || path.startsWith("/admin/entries") ? styles.active : ""} href="/admin">内容管理</Link>
         <Link className={path.startsWith("/admin/profile") ? styles.active : ""} href="/admin/profile">个人资料</Link>
-        <Link className={path.startsWith("/admin/privacy") ? styles.active : ""} href="/admin/privacy">生活密码</Link>
       </nav>
       <Link href="/admin" className={styles.logoutButton} onClick={event=>{event.preventDefault();void logout()}} aria-disabled={loggingOut} aria-label="退出管理员登录">{loggingOut?"正在退出…":"退出管理"}</Link>
       {logoutError&&<p role="alert" className={styles.logoutError}>{logoutError}</p>}

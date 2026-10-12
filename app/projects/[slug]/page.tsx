@@ -33,31 +33,52 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         <h1>{project.title}</h1>
         <p className="portfolio-detail-summary">{project.summary}</p>
         <div className="portfolio-tags portfolio-detail-tags">{project.stack.map(item => <span key={item}>{item}</span>)}</div>
-        {(project.sourceUrl || project.note) && <div className="portfolio-detail-actions">
-          {project.sourceUrl && <a href={project.sourceUrl} target="_blank" rel="noopener noreferrer"><Code2 size={16} aria-hidden="true" /> 查看 {project.sourceLabel ?? "GitHub"} <ArrowUpRight size={15} aria-hidden="true" /></a>}
+        {(project.sourceVisibility === "public" && project.sourceUrl || project.sourceVisibility === "private" || project.note) && <div className="portfolio-detail-actions">
+          {project.sourceVisibility === "public" && project.sourceUrl && <a href={project.sourceUrl} target="_blank" rel="noopener noreferrer"><Code2 size={16} aria-hidden="true" /> 查看 {project.sourceLabel ?? "GitHub"} <ArrowUpRight size={15} aria-hidden="true" /></a>}
+          {project.sourceVisibility === "private" && <span>源码暂未公开</span>}
           {project.note && <span>{project.note}</span>}
         </div>}
       </header>
 
+      {project.background && <section className="portfolio-detail-section">
+        <p className="portfolio-kicker">BACKGROUND</p>
+        <h2>项目背景</h2>
+        <p>{project.background}</p>
+      </section>}
+
+      {project.features && project.features.length > 0 && <section className="portfolio-detail-section">
+        <p className="portfolio-kicker">FEATURES</p>
+        <h2>主要功能</h2>
+        <ul className="portfolio-detail-list">
+          {project.features.map(item => <li key={item}>{item}</li>)}
+        </ul>
+      </section>}
+
+      {project.implementation && project.implementation.length > 0 && <section className="portfolio-detail-section">
+        <p className="portfolio-kicker">IMPLEMENTATION</p>
+        <h2>技术实现与设计</h2>
+        <div className="portfolio-implementation-list">
+          {project.implementation.map(item => <article key={item.title}>
+            <h3>{item.title}</h3>
+            <p>{item.description}</p>
+          </article>)}
+        </div>
+      </section>}
+
       {project.role && <section className="portfolio-detail-section">
-        <p className="portfolio-kicker">MY ROLE</p>
-        <h2>我负责的部分</h2>
+        <p className="portfolio-kicker">MY CONTRIBUTION</p>
+        <h2>我参与的部分</h2>
         <p>{project.role}</p>
       </section>}
 
-      <section className="portfolio-detail-section">
-        <p className="portfolio-kicker">HIGHLIGHTS</p>
-        <h2>项目亮点</h2>
-        <ul className="portfolio-highlight-list">
-          {project.highlights.map(item => <li key={item}>{item}</li>)}
+      {project.limitations && project.limitations.length > 0 && <section className="portfolio-detail-section">
+        <p className="portfolio-kicker">SCOPE</p>
+        <h2>项目范围</h2>
+        <ul className="portfolio-detail-list">
+          {project.limitations.map(item => <li key={item}>{item}</li>)}
         </ul>
-      </section>
+      </section>}
 
-      <section className="portfolio-detail-section portfolio-detail-note">
-        <p className="portfolio-kicker">ABOUT THIS PROJECT</p>
-        <h2>项目说明</h2>
-        <p>{project.background ?? "这是大学阶段的学习与实践记录。页面只描述目前有材料或代码可以支撑的内容；后续可以继续补充真实截图、课程背景、具体问题与解决过程。"}</p>
-      </section>
     </article>
   </SiteShell>;
 }

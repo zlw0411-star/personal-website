@@ -19,7 +19,7 @@ export default async function ProjectsPage() {
       <header className="portfolio-page-hero">
         <p className="portfolio-kicker">PROJECTS</p>
         <h1>项目</h1>
-        <p>这里既有可以查看源码的个人与课程项目，也有源码未保留但有完整过程记录的课程实践案例。</p>
+        <p>这里收录个人作品与课程实践。每个案例介绍其背景、主要功能、实现思路和当前范围；部分源码暂未公开。</p>
       </header>
       {PORTFOLIO_STAGES.map(stage => {
         const projects = PORTFOLIO_PROJECTS.filter(project => project.stage === stage.id);

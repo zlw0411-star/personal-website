@@ -1,7 +1,6 @@
 import type { Entry, ProfileGeneration, RichNode } from "@/lib/content-types";
 
 const ABOUT_EXPERIENCE_BUDGET = 600;
-const ABOUT_LIFE_BUDGET = 180;
 const EXPERIENCE_OVERVIEW_BUDGET = 1600;
 const MAX_ABOUT_ITEMS = 6;
 const MAX_OVERVIEW_ITEMS = 8;
@@ -94,19 +93,13 @@ function overview(entries: Entry[]): GeneratedText {
 
 export function generateProfile(entries: Entry[]): ProfileGeneration {
   const experienceEntries = entries.filter((entry) => entry.category !== "life");
-  const lifeEntries = entries.filter((entry) => entry.category === "life");
   const aboutExperience = roundRobinAbout(experienceEntries, ABOUT_EXPERIENCE_BUDGET, true);
-  const experienceLength = aboutExperience.text.split("\n").reduce((sum, value) => sum + value.length, 0);
-  const lifeBudget = aboutExperience.text
-    ? Math.floor(experienceLength / 3)
-    : Math.min(ABOUT_LIFE_BUDGET, lifeEntries.some((entry) => representative(entry)) ? ABOUT_LIFE_BUDGET : 0);
-  const aboutLife = roundRobinAbout(lifeEntries, lifeBudget);
   const generatedOverview = overview(experienceEntries);
-  const usedIds = new Set([...aboutExperience.sourceIds, ...aboutLife.sourceIds, ...generatedOverview.sourceIds]);
+  const usedIds = new Set([...aboutExperience.sourceIds, ...generatedOverview.sourceIds]);
   const sources = entries.filter((entry) => usedIds.has(entry.id));
 
   return {
-    about: [aboutExperience.text, aboutLife.text].filter(Boolean).join("\n"),
+    about: aboutExperience.text,
     experience: generatedOverview.text,
     sources: sources.map((entry) => ({
       id: entry.id,
@@ -117,9 +110,7 @@ export function generateProfile(entries: Entry[]): ProfileGeneration {
     })),
     counts: {
       experience: sources.filter((entry) => entry.category !== "life").length,
-      life: sources.filter((entry) => entry.category === "life").length,
     },
-    omittedCount: entries.length - sources.length,
-    weights: { experience: 3, life: 1 },
+    omittedCount: entries.filter((entry) => entry.category !== "life").length - sources.length,
   };
 }

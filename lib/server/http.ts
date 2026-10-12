@@ -91,11 +91,12 @@ export function sanitizeDoc(value: unknown): RichDoc {
 export function parseEntry(value: unknown): EntryInput {
   const v = record(value, "文章数据格式无效。");
   if (typeof v.category !== "string" || !CATEGORIES.includes(v.category as EntryInput["category"]) || (v.status !== "draft" && v.status !== "published") || (v.visibility !== "public" && v.visibility !== "private")) throw new Error("请选择有效的分类、发布状态和可见范围。");
+  if (v.category === "life") throw new Error("生活分类已停用。");
   const title = text(v.title, "title"), summary = text(v.summary ?? "", "summary", true), projectUrl = text(v.projectUrl ?? "", "projectUrl", true), repositoryUrl = text(v.repositoryUrl ?? "", "repositoryUrl", true);
   httpUrl(projectUrl); httpUrl(repositoryUrl);
   const coverId = v.coverId === null || v.coverId === "" ? null : text(v.coverId, "coverId");
   const category = v.category === "project" ? "learning" : v.category as EntryInput["category"];
-  return { category, status: v.status, visibility: category === "life" ? "private" : v.visibility, title, summary, projectUrl, repositoryUrl, coverId, body: sanitizeDoc(v.body) };
+  return { category, status: v.status, visibility: v.visibility, title, summary, projectUrl, repositoryUrl, coverId, body: sanitizeDoc(v.body) };
 }
 export function parseProfile(value: unknown): Profile {
   const v = record(value, "个人资料格式无效。");

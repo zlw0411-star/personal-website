@@ -13,7 +13,7 @@ const navigation = [
   { label: "关于", href: "/about", section: "about" as const },
 ];
 
-export default function Header({ profile, currentSection }: { profile: Profile; currentSection: "home" | "projects" | "experience" | "about" | "life" }) {
+export default function Header({ profile, currentSection }: { profile: Profile; currentSection: "home" | "projects" | "experience" | "about" }) {
   return <header className="rr-header">
     <div className="rr-header-inner">
       <Link className="rr-brand" href="/" aria-label={`${profile.siteName}，首页`}>

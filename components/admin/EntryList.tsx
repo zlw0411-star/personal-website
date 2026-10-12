@@ -5,7 +5,7 @@ import Link from "next/link";
 import { CATEGORY_INFO, type Category, type EntrySummary, formatDate } from "@/lib/content-types";
 import styles from "./admin.module.css";
 
-type CategoryTab = "all" | "learning" | "life";
+type CategoryTab = "all" | "learning";
 
 export default function EntryList() {
   const [entries, setEntries] = useState<EntrySummary[]>([]);
@@ -20,13 +20,12 @@ export default function EntryList() {
   const busyIdsRef = useRef(new Set<string>());
 
   const load = useCallback(async () => {
-    setLoading(true);
-    setLoadFailed(false);
-    setError("");
     try {
       const response = await fetch("/api/admin/entries");
       const data = await response.json() as { entries?: EntrySummary[]; error?: string };
       if (!response.ok) throw new Error(data.error || "暂时无法读取内容，请重试。");
+      setLoadFailed(false);
+      setError("");
       setEntries(data.entries || []);
     } catch (cause) {
       setLoadFailed(true);
@@ -36,14 +35,24 @@ export default function EntryList() {
     }
   }, []);
 
-  useEffect(() => { void load(); }, [load]);
+  const retryLoad = () => {
+    setLoading(true);
+    setLoadFailed(false);
+    setError("");
+    void load();
+  };
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void load(); }, 0);
+    return () => window.clearTimeout(timer);
+  }, [load]);
 
   const filtered = useMemo(() => {
     const query = search.trim().toLocaleLowerCase();
     return entries
-      .filter((entry) => category === "all" || (category === "life" ? entry.category === "life" : entry.category === "learning" || entry.category === "project"))
+      .filter((entry) => category === "all" || entry.category === "learning" || entry.category === "project")
       .filter((entry) => state === "all" || entry.status === state)
-      .filter((entry) => visibility === "all" || (entry.category === "life" ? visibility === "private" : entry.visibility === visibility))
+      .filter((entry) => visibility === "all" || entry.visibility === visibility)
       .filter((entry) => !query || `${entry.title} ${entry.summary}`.toLocaleLowerCase().includes(query))
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   }, [entries, category, state, visibility, search]);
@@ -72,7 +81,7 @@ export default function EntryList() {
       <div>
         <p className={styles.eyebrow}>管理入口</p>
         <h1 className={styles.title}>内容管理</h1>
-        <p className={styles.subtitle}>管理个人资料，整理经历与生活记录。</p>
+        <p className={styles.subtitle}>管理个人资料与经历记录。</p>
       </div>
     </header>
 
@@ -87,11 +96,6 @@ export default function EntryList() {
         <strong>新增经历</strong>
         <span>记录时间、学校或单位，以及具体内容。</span>
       </Link>
-      <Link className={styles.quickCard} href="/admin/entries/new?category=life">
-        <span className={styles.eyebrow}>密码保护</span>
-        <strong>写生活记录</strong>
-        <span>写下日常点滴，生活栏目会要求密码解锁。</span>
-      </Link>
     </nav>
 
     <div className={styles.sectionHead}>
@@ -102,10 +106,10 @@ export default function EntryList() {
       <span className={styles.muted}>{filtered.length} 篇</span>
     </div>
 
-    {error && <div role="alert" className={styles.error}>{error}{loadFailed && <button className={styles.textButton} type="button" onClick={() => void load()}>重试</button>}</div>}
+    {error && <div role="alert" className={styles.error}>{error}{loadFailed && <button className={styles.textButton} type="button" onClick={retryLoad}>重试</button>}</div>}
 
     <div className={styles.filterTabs} role="group" aria-label="内容分类">
-      {([ ["all", "全部"], ["learning", "经历"], ["life", "生活"] ] as const).map(([value, label]) =>
+      {([ ["all", "全部"], ["learning", "经历"] ] as const).map(([value, label]) =>
         <button key={value} type="button" aria-pressed={category === value} className={category === value ? styles.toolSelected : styles.tool} onClick={() => setCategory(value)}>{label}</button>
       )}
     </div>
@@ -133,15 +137,14 @@ export default function EntryList() {
       : loadFailed ? null
       : filtered.length === 0 ? <div className={`${styles.panel} ${styles.empty}`}>
         <h2>{entries.length ? "没有符合条件的内容" : "还没有文章记录"}</h2>
-        <p>{entries.length ? "试试调整分类、搜索词或筛选条件。" : "可以先补充经历，或写下一段生活记录。"}</p>
+        <p>{entries.length ? "试试调整分类、搜索词或筛选条件。" : "可以先补充经历记录。"}</p>
         {!entries.length && <div className={styles.cardActions}>
           {(category === "all" || category === "learning") && <Link className={`${styles.button} ${styles.primary}`} href="/admin/entries/new?category=learning">新增经历</Link>}
-          {(category === "all" || category === "life") && <Link className={styles.button} href="/admin/entries/new?category=life">写生活记录</Link>}
         </div>}
       </div> : <div className={styles.cardGrid}>
         {filtered.map((entry) => {
           const categoryLabel = CATEGORY_INFO[entry.category as Category]?.label || "文章";
-          const visibilityLabel = entry.category === "life" ? "密码保护" : entry.visibility === "public" ? "公开" : "仅自己";
+          const visibilityLabel = entry.visibility === "public" ? "公开" : "仅自己";
           const deleting = busyIds.has(entry.id);
           const editHref = `/admin/entries/${encodeURIComponent(entry.id)}`;
           return <article className={styles.listCard} key={entry.id}>

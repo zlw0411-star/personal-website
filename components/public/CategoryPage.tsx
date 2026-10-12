@@ -9,15 +9,15 @@ import ResumeSection from "./resume-template/ResumeSection";
 import TimelineItem from "./resume-template/TimelineItem";
 import Reveal from "./Reveal";
 
-export function CategoryPage({ category, entries, profile }: { category: Category; entries: Entry[]; profile: Profile }) {
+export function CategoryPage({ category, entries, profile }: { category: Exclude<Category, "life">; entries: Entry[]; profile: Profile }) {
   const isExperience = category === "learning";
   const info = CATEGORY_INFO[category];
   const description = isExperience ? "记录求学、实习、工作与项目实践中的每一段成长。" : info.description;
 
-  return <SiteShell profile={profile} currentSection={category === "life" ? "life" : "experience"}><div className={`wrap listing-page${isExperience ? " experience-page rr-experience-page" : ""}`}>
+  return <SiteShell profile={profile} currentSection="experience"><div className={`wrap listing-page${isExperience ? " experience-page rr-experience-page" : ""}`}>
     <Link className="back-link" href="/"><ArrowLeft size={15}/> 回到首页</Link>
     <header className={`listing-hero listing-${category}${isExperience ? " rr-experience-header" : ""}`}>
-      {isExperience ? <span className="eyebrow">求学 · 实习 · 工作 · 项目</span> : <span className="eyebrow">A NOTEBOOK OF {category === "life" ? "LIFE" : "PROJECTS"}</span>}
+      {isExperience ? <span className="eyebrow">求学 · 实习 · 工作 · 项目</span> : <span className="eyebrow">A NOTEBOOK OF PROJECTS</span>}
       <h1>{info.label}{!isExperience && <span className="title-dot">.</span>}</h1>
       <p>{description}</p>
       <span className={`listing-count${isExperience ? " rr-record-count" : ""}`}>{String(entries.length).padStart(2, "0")} 篇记录</span>

@@ -17,7 +17,8 @@ export function PortfolioProjectCard({ project, compact = false }: { project: Po
     </div>
     <div className="portfolio-card-actions">
       <Link href={`/projects/${project.slug}`}>查看项目案例 <ArrowUpRight size={15} aria-hidden="true" /></Link>
-      {project.sourceUrl && <a href={project.sourceUrl} target="_blank" rel="noopener noreferrer"><Code2 size={15} aria-hidden="true" />{project.sourceLabel ?? "GitHub"}</a>}
+      {project.sourceVisibility === "public" && project.sourceUrl && <a href={project.sourceUrl} target="_blank" rel="noopener noreferrer"><Code2 size={15} aria-hidden="true" />{project.sourceLabel ?? "GitHub"}</a>}
+      {project.sourceVisibility === "private" && <span className="portfolio-source-note">源码暂未公开</span>}
     </div>
   </article>;
 }

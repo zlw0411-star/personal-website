@@ -1,5 +1,5 @@
 export const CATEGORIES = ["life", "learning", "project"] as const;
-export const EDITABLE_CATEGORIES = ["learning", "life"] as const;
+export const EDITABLE_CATEGORIES = ["learning"] as const;
 export type Category = (typeof CATEGORIES)[number];
 export type PublishStatus = "draft" | "published";
 export type Visibility = "public" | "private";
@@ -45,14 +45,13 @@ export type ProfileGeneration = {
   about: string;
   experience: string;
   sources: { id: string; title: string; category: Category; status: PublishStatus; visibility: Visibility }[];
-  counts: { experience: number; life: number };
+  counts: { experience: number };
   omittedCount: number;
-  weights: { experience: 3; life: 1 };
 };
 export type MediaUpload = { id: string; url: string; adminUrl: string };
 export const EMPTY_DOC: RichDoc = { type: "doc", content: [{ type: "paragraph" }] };
 export const DEFAULT_PROFILE: Profile = {
-  siteName: "关于我", nickname: "你的昵称", bio: "记录生活，保持好奇，慢慢成长。",
+  siteName: "关于我", nickname: "你的昵称", bio: "展示作品，记录成长。",
   about: "这里将放下我的故事、兴趣，以及正在探索的方向。", experience: "",
   avatarId: null, email: "", links: [], contacts: [],
 };
@@ -88,7 +87,7 @@ export function profileContacts(profile: Pick<Profile, "contacts" | "email" | "l
   return result;
 }
 export const CATEGORY_INFO: Record<Category, { label: string; path: string; description: string }> = {
-  life: { label: "生活", path: "/life", description: "记录日常生活，内容受密码保护。" },
+  life: { label: "生活（已停用）", path: "/life", description: "历史分类，已停用。" },
   learning: { label: "经历", path: "/experience", description: "记录求学、实习、工作，以及其中的项目。" },
   project: { label: "经历", path: "/experience", description: "记录求学、实习、工作，以及其中的项目。" },
 };

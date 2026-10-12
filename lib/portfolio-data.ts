@@ -1,9 +1,11 @@
 export type PortfolioProject = {
   slug: string;
+  stage: PortfolioStage;
   title: string;
   kind: string;
   period: string;
   summary: string;
+  background?: string;
   role?: string;
   stack: string[];
   highlights: string[];
@@ -13,9 +15,18 @@ export type PortfolioProject = {
   note?: string;
 };
 
+export type PortfolioStage = "university" | "internship" | "work";
+
+export const PORTFOLIO_STAGES: { id: PortfolioStage; label: string }[] = [
+  { id: "university", label: "大学期间" },
+  { id: "internship", label: "实习期间" },
+  { id: "work", label: "工作期间" },
+];
+
 export const PORTFOLIO_PROJECTS: PortfolioProject[] = [
   {
     slug: "atlas-power-robot-arm",
+    stage: "university",
     title: "基于 Atlas 200DK 的智能机械臂电力运维",
     kind: "电力智能系统综合实践 · 团队课程项目",
     period: "2026",
@@ -32,6 +43,7 @@ export const PORTFOLIO_PROJECTS: PortfolioProject[] = [
   },
   {
     slug: "campus-card-system",
+    stage: "university",
     title: "青禾校园卡管理系统",
     kind: "课程设计 · Web 全栈项目",
     period: "2026",
@@ -48,6 +60,7 @@ export const PORTFOLIO_PROJECTS: PortfolioProject[] = [
   },
   {
     slug: "desktop-pet",
+    stage: "university",
     title: "Desktop Pet",
     kind: "个人项目 · 桌面应用",
     period: "2026",
@@ -64,6 +77,7 @@ export const PORTFOLIO_PROJECTS: PortfolioProject[] = [
   },
   {
     slug: "java-ee-ordering",
+    stage: "university",
     title: "Java EE 餐饮点餐系统",
     kind: "课程设计 · 微服务实践",
     period: "2026",
@@ -79,6 +93,7 @@ export const PORTFOLIO_PROJECTS: PortfolioProject[] = [
   },
   {
     slug: "cs-study-assistant",
+    stage: "university",
     title: "408 学习助手",
     kind: "个人学习工具",
     period: "2026",
@@ -94,6 +109,7 @@ export const PORTFOLIO_PROJECTS: PortfolioProject[] = [
   },
   {
     slug: "air-ticket-system",
+    stage: "university",
     title: "航空订票系统",
     kind: "课程设计 · 后端业务实践",
     period: "2026",
@@ -109,17 +125,19 @@ export const PORTFOLIO_PROJECTS: PortfolioProject[] = [
   },
   {
     slug: "power-report-platform",
+    stage: "university",
     title: "电力技术监督 AI 报告生成平台",
-    kind: "软件项目综合实践 · 团队课程项目",
+    kind: "软件项目综合实践 · 八人团队课程项目",
     period: "2026",
-    summary: "面向电力行业技术监督场景，覆盖报告创建、模板驱动大纲、正文流式生成、人工编辑、素材管理与多格式导出。",
-    stack: ["FastAPI", "React", "Vite", "JWT", "SSE", "LLM", "DOCX"],
+    summary: "参与技术监督辅助平台的报告生成模块，围绕报告创建、大纲编辑、SSE 正文生成、人工修改与多格式导出完成团队实现和测试。",
+    background: "在上海电力大学《软件项目综合实践》课程中，我参与八人小组开发技术监督辅助平台的报告生成模块。项目面向迎峰度夏检查报告和煤库存审计报告，贯通模板与素材管理、大纲及正文生成、人工编辑和文件导出。",
+    role: "我参与后端模板与专业素材管理、DOCX/Markdown/TXT 导出，也承担功能测试、问题记录和部分文档整理；重点关注文件校验、权限边界、编辑内容保存与异常处理。",
+    stack: ["FastAPI", "React 18", "TypeScript", "SQLAlchemy", "MySQL", "SSE", "python-docx", "pytest"],
     highlights: [
-      "报告流程覆盖基础信息、大纲、正文、预览与导出。",
-      "支持 DOCX、Markdown、TXT 多格式导出，并保留人工编辑后的内容。",
-      "团队项目材料中包含权限控制、文件校验、状态管理与异常测试。",
+      "参与 DOCX 模板和专业素材的上传、管理与使用规则校验。",
+      "参与报告大纲、流式正文、人工编辑保存到多格式导出的业务链路。",
+      "围绕权限隔离、异常输入、素材选择、编辑保护和文件导出开展验证与问题记录。",
     ],
-    note: "课程团队项目 · 源码未保留；个人职责文案后续可按最终分工材料继续完善",
   },
 ];
 

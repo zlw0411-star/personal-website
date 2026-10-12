@@ -19,14 +19,16 @@
 .portfolio-tags span{padding:5px 8px;border:1px solid #dce3dc;border-radius:999px;color:#6c7d73;font-size:10px;line-height:1.2}
 .portfolio-card-actions{display:flex;flex-wrap:wrap;align-items:center;gap:18px;padding-top:30px;border-top:1px solid var(--line)}
 .portfolio-card-actions a,.portfolio-detail-actions a{display:inline-flex;align-items:center;gap:7px;color:var(--teal);font-size:12px;font-weight:700}
-.portfolio-experience-preview{display:grid;grid-template-columns:minmax(0,820px);justify-content:center;text-align:center}
-.portfolio-experience-preview p:not(.portfolio-kicker){max-width:650px;margin:18px auto 0;color:var(--muted)}
-.portfolio-experience-preview .portfolio-text-link{margin-top:25px}
 .portfolio-page-wrap{padding:72px 0 24px}
 .portfolio-page-hero{display:grid;grid-template-columns:minmax(0,720px);padding:36px 0 58px;border-bottom:1px solid var(--line)}
 .portfolio-page-hero h1{margin:0;font-size:clamp(44px,7vw,78px);line-height:1.06}
 .portfolio-page-hero>p:last-child{margin:20px 0 0;color:var(--muted);font-size:15px;line-height:1.9}
-.portfolio-project-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;padding:38px 0}
+.portfolio-project-stage{position:relative;padding:34px 0 12px;scroll-margin-top:100px}
+.portfolio-project-stage::before{position:absolute;top:0;right:0;left:0;height:1px;background:var(--line);content:""}
+.portfolio-project-stage-heading{display:flex;min-width:0;align-items:baseline;justify-content:space-between;gap:20px}
+.portfolio-project-stage-heading h2{min-width:0;margin:0;color:var(--ink);font-family:var(--serif);font-size:clamp(28px,4vw,40px);font-weight:500;letter-spacing:-.04em;line-height:1.2;overflow-wrap:anywhere}
+.portfolio-project-stage-heading span{flex:none;color:var(--muted);font-size:12px}
+.portfolio-project-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;padding:30px 0}
 .portfolio-card-compact{min-height:330px}
 .portfolio-detail-wrap{max-width:900px;padding:52px 0 40px}
 .portfolio-back-link{display:inline-flex;align-items:center;gap:7px;color:var(--muted);font-size:12px}
@@ -62,4 +64,4 @@
 .portfolio-about-hero{padding-bottom:38px}
 .portfolio-footer-note{margin:5px 0 0;color:#9aa39c;font-size:11px}
 @media(max-width:900px){.portfolio-featured-grid{grid-template-columns:1fr}.portfolio-card{min-height:0}.portfolio-project-list{grid-template-columns:1fr}.portfolio-detail-section{grid-template-columns:1fr;gap:12px}.portfolio-detail-section .portfolio-kicker,.portfolio-detail-section h2,.portfolio-detail-section>p:not(.portfolio-kicker),.portfolio-highlight-list{grid-column:1}.experience-stage{grid-template-columns:72px minmax(0,1fr)}.experience-future-note{margin-left:106px}}
-@media(max-width:620px){.portfolio-section,.portfolio-page-wrap,.portfolio-detail-wrap{width:calc(100% - 36px)}.portfolio-section{padding:64px 0}.portfolio-section-heading{align-items:start;flex-direction:column;margin-bottom:28px}.portfolio-featured-grid{gap:12px}.portfolio-card{padding:22px}.portfolio-card h3{margin-top:26px}.portfolio-page-wrap{padding-top:44px}.portfolio-page-hero{padding:22px 0 38px}.portfolio-project-list{gap:12px;padding-top:28px}.portfolio-detail-wrap{padding-top:34px}.portfolio-detail-hero{padding:38px 0}.portfolio-detail-meta{flex-direction:column;gap:4px}.portfolio-detail-section{padding:40px 0}.experience-stage{grid-template-columns:1fr;gap:16px;padding:40px 0}.experience-stage-index{font-size:38px}.experience-stage-heading{align-items:flex-start}.experience-stage-heading h2{font-size:34px}.experience-stage-records{margin-top:34px}.experience-future-note{margin-left:0;padding-top:48px}}
+@media(max-width:620px){.portfolio-section,.portfolio-page-wrap,.portfolio-detail-wrap{width:calc(100% - 36px)}.portfolio-section{padding:64px 0}.portfolio-section-heading{align-items:start;flex-direction:column;margin-bottom:28px}.portfolio-featured-grid{gap:12px}.portfolio-card{padding:22px}.portfolio-card h3{margin-top:26px}.portfolio-page-wrap{padding-top:44px}.portfolio-page-hero{padding:22px 0 38px}.portfolio-project-stage{padding-top:26px}.portfolio-project-stage-heading{align-items:flex-start;gap:12px}.portfolio-project-stage-heading span{padding-top:8px}.portfolio-project-list{gap:12px;padding-top:22px}.portfolio-detail-wrap{padding-top:34px}.portfolio-detail-hero{padding:38px 0}.portfolio-detail-meta{flex-direction:column;gap:4px}.portfolio-detail-section{padding:40px 0}.experience-stage{grid-template-columns:1fr;gap:16px;padding:40px 0}.experience-stage-index{font-size:38px}.experience-stage-heading{align-items:flex-start}.experience-stage-heading h2{font-size:34px}.experience-stage-records{margin-top:34px}.experience-future-note{margin-left:0;padding-top:48px}}

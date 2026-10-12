@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { DEFAULT_PROFILE } from "@/lib/content-types";
 import { getProfile } from "@/lib/server/content";
-import { PORTFOLIO_PROJECTS } from "@/lib/portfolio-data";
+import { PORTFOLIO_PROJECTS, PORTFOLIO_STAGES } from "@/lib/portfolio-data";
 import { SiteShell } from "@/components/public/SiteShell";
 import { PortfolioProjectCard } from "@/components/public/PortfolioProjectCard";
 
@@ -18,12 +18,22 @@ export default async function ProjectsPage() {
     <div className="portfolio-page-wrap">
       <header className="portfolio-page-hero">
         <p className="portfolio-kicker">PROJECTS</p>
-        <h1>做过的项目</h1>
+        <h1>项目</h1>
         <p>这里既有可以查看源码的个人与课程项目，也有源码未保留但有完整过程记录的课程实践案例。</p>
       </header>
-      <div className="portfolio-project-list">
-        {PORTFOLIO_PROJECTS.map(project => <PortfolioProjectCard key={project.slug} project={project} compact />)}
-      </div>
+      {PORTFOLIO_STAGES.map(stage => {
+        const projects = PORTFOLIO_PROJECTS.filter(project => project.stage === stage.id);
+        if (projects.length === 0) return null;
+        return <section className="portfolio-project-stage" id={stage.id} aria-labelledby={`${stage.id}-title`} key={stage.id}>
+          <div className="portfolio-project-stage-heading">
+            <h2 id={`${stage.id}-title`}>{stage.label}</h2>
+            <span>{projects.length} 个项目</span>
+          </div>
+          <div className="portfolio-project-list">
+            {projects.map(project => <PortfolioProjectCard key={project.slug} project={project} compact />)}
+          </div>
+        </section>;
+      })}
     </div>
   </SiteShell>;
 }

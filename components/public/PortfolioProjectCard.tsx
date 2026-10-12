@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, Github } from "lucide-react";
+import { ArrowUpRight, Code2 } from "lucide-react";
 import type { PortfolioProject } from "@/lib/portfolio-data";
 
 export function PortfolioProjectCard({ project, compact = false }: { project: PortfolioProject; compact?: boolean }) {
@@ -17,7 +17,7 @@ export function PortfolioProjectCard({ project, compact = false }: { project: Po
     </div>
     <div className="portfolio-card-actions">
       <Link href={`/projects/${project.slug}`}>查看项目案例 <ArrowUpRight size={15} aria-hidden="true" /></Link>
-      {project.sourceUrl && <a href={project.sourceUrl} target="_blank" rel="noopener noreferrer"><Github size={15} aria-hidden="true" />{project.sourceLabel ?? "GitHub"}</a>}
+      {project.sourceUrl && <a href={project.sourceUrl} target="_blank" rel="noopener noreferrer"><Code2 size={15} aria-hidden="true" />{project.sourceLabel ?? "GitHub"}</a>}
     </div>
   </article>;
 }

@@ -30,15 +30,6 @@ export default async function Home() {
       </div>
     </section>
 
-    <section className="portfolio-section portfolio-experience-preview" aria-labelledby="experience-preview-title">
-      <Reveal>
-        <p className="portfolio-kicker">EXPERIENCE</p>
-        <h2 id="experience-preview-title">从大学开始，记录每一段经历。</h2>
-        <p>目前以大学阶段的学习、课程设计和个人项目为主。以后有实习和工作经历时，再按阶段继续补充。</p>
-        <Link className="portfolio-text-link" href="/experience">查看大学阶段经历 <ArrowUpRight size={16} aria-hidden="true" /></Link>
-      </Reveal>
-    </section>
-
     <About profile={profile} />
   </div></SiteShell>;
 }

@@ -10,7 +10,6 @@ import type { Profile } from "@/lib/content-types";
 const navigation = [
   { label: "首页", href: "/", section: "home" as const },
   { label: "项目", href: "/projects", section: "projects" as const },
-  { label: "经历", href: "/experience", section: "experience" as const },
   { label: "关于", href: "/about", section: "about" as const },
 ];
 

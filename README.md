@@ -63,6 +63,18 @@ Profile 联系方式与摘录逻辑可在不启动网站、不写入数据库的
 node --experimental-strip-types scripts/verify-profile-generation.mjs
 ```
 
+新建文章的响应丢失恢复可用模拟 fetch 检查固定创建编号、原请求重试和后续编辑：
+
+```sh
+node --experimental-strip-types scripts/verify-entry-create-client.mjs
+```
+
+服务端幂等创建、并发请求、媒体引用、重启恢复与旧 POST 调用可在脚本创建并清理的临时 D1 中检查，不连接网站正在使用的数据库：
+
+```sh
+node scripts/verify-entry-create-idempotency.mjs
+```
+
 该脚本以纯内存样例验证个人介绍生成会排除遗留生活分类。`scripts/verify-hosted-local.mjs` 检查托管构建及停用路由，并在隔离本地运行时中使用临时数据；它不是纯内存检查。管理员登录相关验收仍受上文所述运行时重启 503 阻塞。
 
 Profile 的 D1 读写与重启持久化可用独立临时数据库验证；脚本只在 `.sites-runtime/profile-storage-<随机ID>/` 创建并删除自己的验收数据，不访问网站正在使用的 D1/R2：

@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, ne } from "drizzle-orm";
+import { and, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { DEFAULT_PROFILE, type Category, type Entry, type EntryInput, type EntrySummary, type Profile, type RichDoc, type RichNode } from "@/lib/content-types";
 import { entries, entryMedia, media, profile } from "@/db/schema";
@@ -60,7 +60,7 @@ export async function saveEntry(id: string | null, input: EntryInput): Promise<E
   if (input.coverId) mediaIds.add(input.coverId);
   if (mediaIds.size) {
     const found = await db.select({ id: media.id }).from(media).where(inArray(media.id, [...mediaIds]));
-    if (found.length !== mediaIds.size) throw new Error("Entry references missing media");
+    if (found.length !== mediaIds.size) throw Object.assign(new Error("Entry references missing media"), { code: "ENTRY_INVALID_MEDIA" });
   }
   const entryId = id ?? crypto.randomUUID();
   const publishedAt = input.status === "published" ? existing?.publishedAt ?? now : existing?.publishedAt ?? null;
@@ -72,6 +72,38 @@ export async function saveEntry(id: string | null, input: EntryInput): Promise<E
     await db.batch([upsert, clearLinks, addLinks]);
   } else await db.batch([upsert, clearLinks]);
   return (await getAdminEntry(entryId))!;
+}
+export async function createEntry(createId: string, input: EntryInput): Promise<{ entry: Entry; created: boolean }> {
+  if (input.category === "life") throw new Error("Life category is disabled");
+  input = { ...input, category: input.category === "project" ? "learning" : input.category };
+  const db = getDb(); const now = new Date().toISOString();
+  const mediaIds = collectMediaIds(input.body);
+  if (input.coverId) mediaIds.add(input.coverId);
+  if (mediaIds.size) {
+    const found = await db.select({ id: media.id }).from(media).where(inArray(media.id, [...mediaIds]));
+    if (found.length !== mediaIds.size) throw Object.assign(new Error("Entry references missing media"), { code: "ENTRY_INVALID_MEDIA" });
+  }
+  const row = { id: createId, ...input, body: JSON.stringify(input.body), createdAt: now, updatedAt: now,
+    publishedAt: input.status === "published" ? now : null };
+  const insert = db.insert(entries).values(row).onConflictDoNothing({ target: entries.id }).returning({ id: entries.id });
+  // D1 runs a batch transactionally. `changes()` gates every link insert on the
+  // preceding entry insert, so a replay can never attach media to an ID collision.
+  const statements = [insert, ...[...mediaIds].map(mediaId => db.insert(entryMedia).select(
+    db.select({ entryId: entries.id, mediaId: sql`${mediaId}`.as("media_id") }).from(entries)
+      .where(and(eq(entries.id, createId), sql`changes() > 0`))
+  ))] as const;
+  const results = await db.batch(statements);
+  const entry = await getAdminEntry(createId);
+  if (!entry) throw new Error("Unable to create entry");
+  if (!sameEntryInput(entry, input)) throw Object.assign(new Error("Entry create ID already belongs to different content"), { code: "ENTRY_CREATE_CONFLICT" });
+  return { entry, created: results[0].length > 0 };
+}
+
+function sameEntryInput(entry: Entry, input: EntryInput): boolean {
+  return entry.category === input.category && entry.title === input.title && entry.summary === input.summary
+    && entry.status === input.status && entry.visibility === input.visibility && entry.coverId === input.coverId
+    && entry.projectUrl === input.projectUrl && entry.repositoryUrl === input.repositoryUrl
+    && JSON.stringify(entry.body) === JSON.stringify(input.body);
 }
 export function collectMediaIds(doc: RichDoc, result = new Set<string>()): Set<string> {
   const visit = (node: RichNode) => {

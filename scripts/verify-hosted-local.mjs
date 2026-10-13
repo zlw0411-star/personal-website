@@ -16,6 +16,8 @@ const assertions = [], verifyProgress = [];
 let child = null, password = `Hosted-QA-${randomUUID()}-fixture`;
 let phase = "startup";
 let authStatusDiagnostic = null;
+let loginWindow = null;
+let workerEvents = [];
 const verifyAdminLabels = new Set([
   "admin auth status exposes configuration without authenticating",
   "anonymous management access is denied before data is read",
@@ -27,6 +29,7 @@ const verifyAdminLabels = new Set([
   "admin login response confirms success",
   "admin login cookie format is valid",
   "admin login cookie uses secure attributes",
+  "correct password creates a strict HttpOnly 12-hour admin session",
   "admin auth status confirms the independent session",
   "authenticated writes still require exact same-origin",
   "authenticated admin can upload a fixture image",
@@ -100,18 +103,29 @@ async function waitExit(proc, timeoutMs) {
 async function killTree(proc) {
   if (proc.exitCode !== null || proc.signalCode !== null) return { status: "already-exited" };
   if (process.platform === "win32") {
+    if (proc.stdin?.writable) proc.stdin.end("STOP\n");
+    const graceful = await waitExit(proc, 15_000);
+    if (!graceful.timeout) return { status: "stopped" };
     for (let attempt = 0; attempt < 2 && proc.exitCode === null && proc.signalCode === null; attempt++) {
       const killer = spawn("taskkill.exe", ["/PID", String(proc.pid), "/T", "/F"], { windowsHide: true, stdio: ["ignore", "ignore", "ignore"] });
       const killResult = await waitExit(killer, 5000);
       const exitResult = await waitExit(proc, 5000);
-      if (exitResult.timeout && attempt === 1) throw codedError("OWNED_PROCESS_TREE_TIMEOUT", { exitCode: killResult.code });
+      if (exitResult.timeout && attempt === 1) {
+        let alive = true;
+        try { process.kill(proc.pid, 0); } catch (error) { if (error?.code === "ESRCH") alive = false; }
+        if (alive) throw codedError("OWNED_PROCESS_TREE_TIMEOUT", { exitCode: killResult.code });
+      }
     }
   } else {
     proc.kill("SIGTERM");
     const termResult = await waitExit(proc, 3000);
     if (termResult.timeout) { proc.kill("SIGKILL"); await waitExit(proc, 3000); }
   }
-  if (proc.exitCode === null && proc.signalCode === null) throw codedError("OWNED_PROCESS_TREE_TIMEOUT");
+  if (proc.exitCode === null && proc.signalCode === null) {
+    let alive = true;
+    try { process.kill(proc.pid, 0); } catch (error) { if (error?.code === "ESRCH") alive = false; }
+    if (alive) throw codedError("OWNED_PROCESS_TREE_TIMEOUT");
+  }
   return { status: "stopped" };
 }
 async function runCli(args, input = "", timeoutMs = 90_000, extraEnv = {}, stage = "bounded-child") {
@@ -149,7 +163,7 @@ async function start(vars, migrate = false) {
   await writeConfig(vars);
   if (migrate) await runCli([path.join(root, "node_modules", "wrangler", "bin", "wrangler.js"), "d1", "migrations", "apply", "DB", "--local", "--config", qaConfig, "--persist-to", stateDir], "", 90_000, {}, "isolated-migration");
   child = spawn(process.execPath, [path.join(root, "scripts", "qa-worker.mjs"), qaConfig, stateDir, String(port), path.join(qaDir, "registry")], {
-    cwd: root, windowsHide: true, stdio: ["ignore", "pipe", "pipe"],
+    cwd: root, windowsHide: true, stdio: ["pipe", "pipe", "pipe"],
     env: safeEnv(),
   });
   let wrapperReady = false, stdoutBuffer = "";
@@ -218,7 +232,10 @@ try {
   phase = "same-origin-and-admin-login";
   const wrongOrigin = await request("/api/admin/auth/login", { method: "POST", headers: { "Content-Type": "application/json", Origin: "https://invalid.example", "Sec-Fetch-Site": "cross-site" }, body: JSON.stringify({ password }) });
   check(wrongOrigin.status === 403, "admin login rejects a non-matching origin");
+  loginWindow = { startedAt: new Date().toISOString() };
   const login = await request("/api/admin/auth/login", { method: "POST", headers: { ...sameOrigin, "Content-Type": "application/json" }, body: JSON.stringify({ password }) });
+  loginWindow.finishedAt = new Date().toISOString();
+  loginWindow.httpStatus = login.status;
   const loginBody = await json(login);
   const loginCookie = login.headers.get("set-cookie") ?? "";
   const adminCookie = loginCookie.split(";")[0];
@@ -251,7 +268,12 @@ try {
   await mkdir(qaDir, { recursive: true });
   result.verifyAdminProgress = verifyProgress;
   result.authStatusDiagnostic = authStatusDiagnostic;
+  result.loginWindow = loginWindow;
+  try {
+    workerEvents = (await readFile(path.join(qaDir, "worker-events.jsonl"), "utf8")).trim().split(/\r?\n/u).filter(Boolean).map(line => JSON.parse(line));
+  } catch { workerEvents = []; }
+  result.workerEvents = workerEvents;
   await writeFile(path.join(qaDir, "result.json"), `${JSON.stringify(result, null, 2)}\n`, { mode: 0o600 });
 }
-console.log(JSON.stringify({ assertions: assertions.length, passed: assertions.filter(item => item.passed).length, failed: assertions.filter(item => !item.passed).length, failures: assertions.filter(item => !item.passed), verifyAdminProgress: verifyProgress, authStatusDiagnostic }));
+console.log(JSON.stringify({ assertions: assertions.length, passed: assertions.filter(item => item.passed).length, failed: assertions.filter(item => !item.passed).length, failures: assertions.filter(item => !item.passed), verifyAdminProgress: verifyProgress, authStatusDiagnostic, loginWindow, workerEvents }));
 if (assertions.some(item => !item.passed)) process.exitCode = 1;

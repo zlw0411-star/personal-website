@@ -53,7 +53,9 @@ Windows 用户也可以双击项目根目录的 `启动网站.cmd`。它会在�
 
 ## 验证本地 API
 
-本次本地页面检查、已停用生活路由的 404 检查、TypeScript 类型检查和生产构建均已通过。隔离托管验收的管理员登录仍遇到运行时重启导致的 503，因此管理员登录及后续 CRUD 尚未完成完整验收；公网发布继续暂停，上线前必须解决该运行时问题并重新完成验收。
+本地页面检查、已停用生活路由的 404 检查、TypeScript 类型检查和生产构建均已通过。生产构建直接由 Miniflare 加载的隔离验收通过 55 项检查，覆盖管理员鉴权、内容与媒体 CRUD、公开/私密访问、个人资料及文章/图片重启持久化、登出复放和错误密码锁定，可用 `node scripts/verify-hosted-miniflare.mjs` 重跑。该路径不经过 Wrangler Dev Proxy。
+
+另一条隔离验收通过 Wrangler Dev Proxy 启动同一生产构建，但管理员登录 POST 返回 503，响应称 Worker 在请求期间重启。只读生命周期记录没有捕获登录窗口内的 reload/error 事件，因此触发原因仍未知。管理员登录通过直接 Miniflare 对照，但 Wrangler 代理模式验收仍未完成；公网尚未发布，不能据此宣称公网环境已通过。相关隔离报告保存在各自 `.sites-runtime/hosted-qa-*` 和 `.sites-runtime/hosted-miniflare-*` 目录。
 
 Profile 联系方式与摘录逻辑可在不启动网站、不写入数据库的情况下检查：
 

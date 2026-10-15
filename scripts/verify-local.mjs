@@ -152,7 +152,7 @@ async function checkFixture() {
   await expect(response.ok && body.entry?.title === fixture.title && body.entry.status === "draft" && body.entry.visibility === "private" && body.entry.coverId === fixture.mediaId, "服务器重启后自有私密验收文章仍存在");
   const mediaResponse = await request(`/api/admin/media/${encodeURIComponent(fixture.mediaId)}`);
   const mediaBytes = new Uint8Array(await mediaResponse.arrayBuffer());
-  await expect(mediaResponse.ok && mediaBytes.length === png.length && mediaBytes.every((byte, i) => byte === png[i]), "服务器重启后 R2 验收图片字节保持一致");
+  await expect(mediaResponse.ok && mediaBytes.length === png.length && mediaBytes.every((byte, i) => byte === png[i]), "服务器重启后图片字节保持一致（KV）");
   entryId = fixture.entryId; mediaId = fixture.mediaId;
   persistenceChecksPassed = true;
 }

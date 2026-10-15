@@ -1,6 +1,6 @@
 # 关于我 · 本地个人网站
 
-一个简洁的中文个人网站，包含公开文章、个人介绍和受管理员认证保护的内容管理页。开发时内容存放在本地 D1/R2 模拟器中；Sites 公网环境可使用云端 D1/R2。浏览器 `localStorage` 不保存网站内容。
+一个简洁的中文个人网站，包含公开文章、个人介绍和受管理员认证保护的内容管理页。开发时内容存放在本地 D1/KV 模拟器中；公网环境可使用云端 D1/KV。浏览器 `localStorage` 不保存网站内容。
 
 ## 模板来源与二创
 
@@ -27,11 +27,15 @@ Windows 用户也可以双击项目根目录的 `启动网站.cmd`。它会在�
 
 `npm start` 使用生产构建进行本地预览，默认只能浏览网站内容，管理 API 保持关闭。只有显式配置下文所列的托管环境变量后，生产管理 API 才会开放。编辑内容请使用 `npm run dev` 或 `启动网站.cmd`。
 
-## Sites 公网环境
+## 公网部署（Cloudflare Workers）
 
-当前状态：Sites 项目已注册但尚未发布；公网发布与相关验收按用户要求暂停，网站本地数据尚未迁移。
+本站已部署到 Cloudflare Workers：Worker `aboutme`，地址 `https://aboutme.lingwei.workers.dev`，数据在云端 D1（亚太）与 KV。**部署手册见 [DEPLOY.md](DEPLOY.md)**，包含从注册账号、建资源到发布、回滚、内容同步的完整步骤；日常改完代码后用 `npm run build` 加 `npm run deploy:cf` 重新发布。
 
-部署到 Sites 时，网站通过 HTTPS 提供访问，并使用云端 D1/R2 保存网站数据。公开页面只需要公开内容；不要把内容数据库或迁移数据提交到 Git。需要迁移正文时，通过网站管理员 API 导入，迁移数据独立于源码仓库管理。
+### Sites 公网环境
+
+Sites 项目已注册，但公网部署最终走的是 Cloudflare Workers（见上）。
+
+部署到 Sites 时，网站通过 HTTPS 提供访问，并使用云端 D1/KV 保存网站数据。公开页面只需要公开内容；不要把内容数据库或迁移数据提交到 Git。需要迁移正文时，通过网站管理员 API 导入，迁移数据独立于源码仓库管理。
 
 生产环境默认关闭管理功能。需要启用时，在 Sites 的服务端 runtime 配置 `SITE_ADMIN_ENABLED=true`，并将 `SITE_ORIGIN` 设置为网站的精确 origin（包含协议和域名，不带路径）；浏览器端不读取管理密钥或这些服务端变量。公开页面的“管理内容”入口始终显示，真正的访问控制由服务端 gate 和管理员密码认证执行。
 
@@ -77,7 +81,7 @@ node scripts/verify-entry-create-idempotency.mjs
 
 该脚本以纯内存样例验证个人介绍生成会排除遗留生活分类。`scripts/verify-hosted-local.mjs` 检查托管构建及停用路由，并在隔离本地运行时中使用临时数据；它不是纯内存检查。管理员登录相关验收仍受上文所述运行时重启 503 阻塞。
 
-Profile 的 D1 读写与重启持久化可用独立临时数据库验证；脚本只在 `.sites-runtime/profile-storage-<随机ID>/` 创建并删除自己的验收数据，不访问网站正在使用的 D1/R2：
+Profile 的 D1 读写与重启持久化可用独立临时数据库验证；脚本只在 `.sites-runtime/profile-storage-<随机ID>/` 创建并删除自己的验收数据，不访问网站正在使用的 D1/KV：
 
 ```sh
 node scripts/verify-profile-storage.mjs
@@ -101,4 +105,4 @@ node scripts/verify-local.mjs --check-persistence
 
 ## 备份与恢复
 
-开发服务器停止后，复制整个 `.wrangler/state/` 目录即可备份本地 D1 数据和 R2 图片。恢复时先停止服务器，再将备份内容放回 `.wrangler/state/`，然后重新运行 `npm run dev`。不要在服务器运行时复制状态目录。`.sites-runtime/` 主要保存本地工具状态，也可能包含手动导出的数据库备份；网站正常运行数据以 `.wrangler/state/` 为准。历史生活保护、管理员登录和个人资料工具的迁移及备份文件保留作恢复参考；停用生活功能不会删除旧表或记录。若在没有 `life_security` 数据的全新数据库上应用管理员迁移，管理员密码不会被初始化；请从已有备份恢复数据，不提供公开的密码初始化接口。`.vinext/` 保存开发服务器状态；清理本地目录前请保留需要的备份。
+开发服务器停止后，复制整个 `.wrangler/state/` 目录即可备份本地 D1 数据和 KV 图片。恢复时先停止服务器，再将备份内容放回 `.wrangler/state/`，然后重新运行 `npm run dev`。不要在服务器运行时复制状态目录。`.sites-runtime/` 主要保存本地工具状态，也可能包含手动导出的数据库备份；网站正常运行数据以 `.wrangler/state/` 为准。历史生活保护、管理员登录和个人资料工具的迁移及备份文件保留作恢复参考；停用生活功能不会删除旧表或记录。若在没有 `life_security` 数据的全新数据库上应用管理员迁移，管理员密码不会被初始化；请从已有备份恢复数据，不提供公开的密码初始化接口。`.vinext/` 保存开发服务器状态；清理本地目录前请保留需要的备份。

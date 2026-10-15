@@ -82,7 +82,7 @@ async function seed() {
 async function writeConfig(vars) {
   const config = JSON.parse(await readFile(builtConfig, "utf8"));
   const db = config.d1_databases?.find(binding => binding.binding === "DB");
-  if (!db || !config.r2_buckets?.some(binding => binding.binding === "BUCKET")) throw new Error("built config lacks expected local storage bindings");
+  if (!db || !config.kv_namespaces?.some(binding => binding.binding === "MEDIA")) throw new Error("built config lacks expected local storage bindings");
   db.migrations_dir = path.join(root, "drizzle");
   config.vars = { ...(config.vars ?? {}), ...vars };
   await writeFile(qaConfig, `${JSON.stringify(config, null, 2)}\n`, { mode: 0o600 });

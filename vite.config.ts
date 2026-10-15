@@ -8,7 +8,12 @@ import { connectorPreview } from "./build/connector-preview-plugin.mjs";
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
   "00000000-0000-4000-8000-000000000000";
 
-const { d1, r2 } = hostingConfig;
+// KV 命名空间 ID 是 32 位十六进制；本地开发用这个占位值，部署时由
+// scripts/deploy-cloudflare.mjs 注入真实 ID。
+const SITE_CREATOR_PLACEHOLDER_NAMESPACE_ID =
+  "00000000000000000000000000000000";
+
+const { d1, kv } = hostingConfig;
 
 // macOS Seatbelt blocks FSEvents, so Codex previews need polling for HMR.
 const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
@@ -26,11 +31,11 @@ const localBindingConfig = {
         },
       ]
     : [],
-  r2_buckets: r2
+  kv_namespaces: kv
     ? [
         {
-          binding: r2,
-          bucket_name: "site-creator-r2",
+          binding: kv,
+          id: SITE_CREATOR_PLACEHOLDER_NAMESPACE_ID,
         },
       ]
     : [],

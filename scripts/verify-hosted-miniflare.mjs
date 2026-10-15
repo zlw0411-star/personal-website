@@ -86,7 +86,7 @@ async function makeWorker(configPath, stateDir) {
     }
   };
   await visitModules(serverRoot);
-  const runtime = new Miniflare({ ...generated.workerOptions, modules, modulesRoot: serverRoot, d1Persist: stateDir, r2Persist: stateDir });
+  const runtime = new Miniflare({ ...generated.workerOptions, modules, modulesRoot: serverRoot, d1Persist: stateDir, kvPersist: stateDir });
   return { runtime, worker: await runtime.getWorker() };
 }
 
@@ -162,7 +162,7 @@ async function verifyRestartPersistence(password) {
   record(assertions, adminDetailResponse.ok && persistedEntry?.id === entryId && persistedEntry.title === entryTitle && persistedEntry.body?.type === "doc" && persistedEntry.body?.content?.[0]?.content?.[0]?.text === "Isolated fixture body." && persistedEntry.coverId === mediaId && persistedEntry.status === "draft" && persistedEntry.visibility === "private", "article title, body, cover, status, and visibility persist after restart", adminDetailResponse.status);
   const adminImage = await workerRequest(worker, `/api/admin/media/${mediaId}`, { cookie: restartedCookie });
   const image = new Uint8Array(await adminImage.arrayBuffer());
-  record(assertions, adminImage.ok && image.length === imageBytes.length && image.every((byte, index) => byte === imageBytes[index]), "private image bytes persist in isolated R2 after restart", adminImage.status);
+  record(assertions, adminImage.ok && image.length === imageBytes.length && image.every((byte, index) => byte === imageBytes[index]), "private image bytes persist in isolated KV after restart", adminImage.status);
   record(assertions, (await workerRequest(worker, `/api/entries/${entryId}`)).status === 404 && (await workerRequest(worker, `/api/media/${mediaId}`)).status === 404, "private article and media remain hidden after restart");
 
   const published = { ...payload, status: "published", visibility: "public" };
@@ -256,7 +256,7 @@ try {
   result.lockoutAssertions = lockoutAssertions;
   result.assertionCount = directCrud.assertionsPassed + persistenceAssertions.length + lockoutAssertions.length + 3;
   await writeFile(resultPath, `${JSON.stringify(result, null, 2)}\n`, { mode: 0o600 });
-  await writeFile(reportPath, `# Isolated hosted runtime QA\n\n- Result: PASS (${result.assertionCount}/${result.assertionCount})\n- Runtime: production build loaded directly by Miniflare, with isolated D1/R2 and assets\n- Coverage: admin auth and same-origin checks; 28 CRUD/media/security assertions; profile/article/image persistence across worker restart; public/private visibility; logout replay; wrong-password lockout\n- Data: generated fixtures were deleted or restored; state is isolated under \`${stateDir}\`\n- Wrangler comparison: see the separate hosted-local QA report. Its proxy returned HTTP 503 and reported a worker restart during login; the triggering cause is not established.\n`, { mode: 0o600 });
+  await writeFile(reportPath, `# Isolated hosted runtime QA\n\n- Result: PASS (${result.assertionCount}/${result.assertionCount})\n- Runtime: production build loaded directly by Miniflare, with isolated D1/KV and assets\n- Coverage: admin auth and same-origin checks; 28 CRUD/media/security assertions; profile/article/image persistence across worker restart; public/private visibility; logout replay; wrong-password lockout\n- Data: generated fixtures were deleted or restored; state is isolated under \`${stateDir}\`\n- Wrangler comparison: see the separate hosted-local QA report. Its proxy returned HTTP 503 and reported a worker restart during login; the triggering cause is not established.\n`, { mode: 0o600 });
   console.log(JSON.stringify(result));
 } catch (error) {
   if (error?.qaResult) {

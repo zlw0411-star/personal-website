@@ -1,5 +1,20 @@
 # 交接进度（2026-10-11）
 
+> **2026-10-15 更新：已部署上线。** Worker `aboutme`，地址 `https://aboutme.lingwei.workers.dev`，
+> 数据在云端 D1（亚太区域）与 KV；两项资源的真实 ID 只保存在本机被 Git 忽略的 `.env.deploy` 中，不写入仓库。
+> 本地 10 篇文章与个人资料已同步到云端。部署与日常发布步骤见 [DEPLOY.md](DEPLOY.md)。
+>
+> 本轮改动：
+> - **图片存储 R2 → KV**（R2 需要绑国际卡，KV 包含在免费计划内）：新增 [lib/server/media-store.ts](lib/server/media-store.ts) 适配层，
+>   改动三个媒体路由与构建配置；新增 KV 专项验证与本地图片搬迁脚本。隔离生产验收 55/55 通过。
+> - **修复站内点击不跳转**：根因是 vinext `1.0.0-beta.5` 客户端软导航在点击时抛
+>   `TypeError: e is not a function`（业务代码无关）。公开页面站内链接改用普通 `<a>`
+>   （见 [components/public/SiteLink.tsx](components/public/SiteLink.tsx)，集中说明原因），
+>   已用无头浏览器在线上与本地验证 6 个跳转步骤全部正常且无 JS 异常。
+>   后台管理界面的 `next/link` 未改（生产后台默认关闭）；升级 vinext 至 1.2.0 后可整体换回。
+> - 已知限制：`workers.dev` 在中国大陆被 DNS 污染且 SNI 封锁，国内访客需自备代理；
+>   绑定自有域名（免备案，Cloudflare 代理 IP 实测可达）即可解决。
+
 ## 当前上线状态
 
 - 生产相关改动的 typecheck 与 build 已通过。公网发布及相关验收按用户要求暂停；Sites 已注册但尚未发布（`live` 为空、版本为 0），不会继续发布或迁移。

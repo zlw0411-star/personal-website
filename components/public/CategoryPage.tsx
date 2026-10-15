@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { SiteLink } from "@/components/public/SiteLink";
 import { ArrowLeft } from "lucide-react";
 import type { Category, Entry, Profile } from "@/lib/content-types";
 import { CATEGORY_INFO } from "@/lib/content-types";
@@ -15,7 +15,7 @@ export function CategoryPage({ category, entries, profile }: { category: Exclude
   const description = isExperience ? "记录求学、实习、工作与项目实践中的每一段成长。" : info.description;
 
   return <SiteShell profile={profile} currentSection="experience"><div className={`wrap listing-page${isExperience ? " experience-page rr-experience-page" : ""}`}>
-    <Link className="back-link" href="/"><ArrowLeft size={15}/> 回到首页</Link>
+    <SiteLink className="back-link" href="/"><ArrowLeft size={15}/> 回到首页</SiteLink>
     <header className={`listing-hero listing-${category}${isExperience ? " rr-experience-header" : ""}`}>
       {isExperience ? <span className="eyebrow">求学 · 实习 · 工作 · 项目</span> : <span className="eyebrow">A NOTEBOOK OF PROJECTS</span>}
       <h1>{info.label}{!isExperience && <span className="title-dot">.</span>}</h1>

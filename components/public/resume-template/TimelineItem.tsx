@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { SiteLink } from "@/components/public/SiteLink";
 import { ArrowUpRight } from "lucide-react";
 import type { Entry } from "@/lib/content-types";
 import { formatDate } from "@/lib/content-types";
@@ -10,12 +10,12 @@ import { formatDate } from "@/lib/content-types";
  * Full license: vendor/react-resume-template/LICENSE
  */
 export default function TimelineItem({ entry }: { entry: Entry }) {
-  return <Link className="rr-timeline-item" href={`/entries/${encodeURIComponent(entry.id)}`}>
+  return <SiteLink className="rr-timeline-item" href={`/entries/${encodeURIComponent(entry.id)}`}>
     <span className="rr-timeline-date">发布于 · <time dateTime={entry.publishedAt ?? undefined}>{formatDate(entry.publishedAt)}</time></span>
     <h3>
       <span>{entry.title}</span>
       <ArrowUpRight aria-hidden="true" size={18} />
     </h3>
     {entry.summary.trim() && <p>{entry.summary}</p>}
-  </Link>;
+  </SiteLink>;
 }

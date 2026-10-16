@@ -68,6 +68,17 @@ test("game explicitly states local AI opponents and excludes network multiplayer
   assert.ok(project.limitations.some(text => text.includes("未声明开源许可证")));
 });
 
+test("game documents both combat modes without confusing visuals with damage", () => {
+  const project = getPortfolioProject("emberfall-arena");
+  assert.match(project.summary, /经典远程与近战刀战/);
+  const features = project.features.join("\n");
+  for (const skill of ["突进斩", "旋风斩", "重斩"]) assert.ok(features.includes(skill), skill);
+  assert.match(features, /左键点击挥刀、按住连续斩击/);
+  assert.match(features, /重开沿用当前模式/);
+  assert.ok(project.implementation.some(item => item.description.includes("视觉余效不参与伤害")));
+  assert.ok(project.limitations.some(text => text.includes("不含翻滚、格挡、弹反或技能无敌")));
+});
+
 test("updated portfolio pages retain the plain-anchor navigation workaround", () => {
   for (const path of ["app/page.tsx", "app/projects/[slug]/page.tsx"]) {
     const source = readFileSync(new URL(`../${path}`, import.meta.url), "utf8");

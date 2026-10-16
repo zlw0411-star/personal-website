@@ -15,7 +15,8 @@
     "deploy:cf": "node scripts/deploy-cloudflare.mjs",
     "typecheck": "tsc --noEmit",
     "setup:local": "node scripts/setup-local.mjs",
-    "verify:local": "node scripts/verify-local.mjs"
+    "verify:local": "node scripts/verify-local.mjs",
+    "verify:portfolio": "node --experimental-strip-types scripts/verify-portfolio.mjs"
   },
   "dependencies": {
     "@tiptap/react": "3.31.4",

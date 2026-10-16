@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { SiteLink } from "@/components/public/SiteLink";
 import { ArrowUpRight } from "lucide-react";
 import { DEFAULT_PROFILE } from "@/lib/content-types";
 import { getProfile } from "@/lib/server/content";
@@ -21,9 +21,9 @@ export default async function Home() {
         <div>
           <p className="portfolio-kicker">SELECTED WORK</p>
           <h2 id="featured-projects-title">精选项目</h2>
-          <p>精选 Java 全栈业务工程与智能硬件实践，呈现从业务流程到软硬件协作的项目经验。</p>
+          <p>精选 Java 全栈业务系统与学习资料工具，展示业务流程、异常恢复和桌面交互方面的项目实践。</p>
         </div>
-        <Link className="portfolio-heading-link" href="/projects">查看全部项目 <ArrowUpRight size={16} aria-hidden="true" /></Link>
+        <SiteLink className="portfolio-heading-link" href="/projects">查看全部项目 <ArrowUpRight size={16} aria-hidden="true" /></SiteLink>
       </Reveal>
       <div className="portfolio-featured-grid">
         {FEATURED_PROJECTS.map(project => <Reveal key={project.slug}><PortfolioProjectCard project={project} /></Reveal>)}

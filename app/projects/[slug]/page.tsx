@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { SiteLink } from "@/components/public/SiteLink";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowUpRight, Code2 } from "lucide-react";
 import { DEFAULT_PROFILE } from "@/lib/content-types";
@@ -27,7 +27,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   return <SiteShell profile={profile} currentSection="projects">
     <article className="portfolio-detail-wrap">
-      <Link className="portfolio-back-link" href="/projects"><ArrowLeft size={15} aria-hidden="true" /> 返回项目列表</Link>
+      <SiteLink className="portfolio-back-link" href="/projects"><ArrowLeft size={15} aria-hidden="true" /> 返回项目列表</SiteLink>
       <header className="portfolio-detail-hero">
         <div className="portfolio-detail-meta"><span>{project.kind}</span><span>{project.period}</span></div>
         <h1>{project.title}</h1>

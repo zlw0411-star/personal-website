@@ -1,15 +1,15 @@
-# 作品集内容同步（2026-10-16）
+# 作品集内容同步（2026-10-19）
 
 项目介绍由 `lib/portfolio-data.ts` 维护，不会自动随 GitHub 提交更新。以下记录各项目最近一次核对的公开版本；首次同步时本地 HEAD 与远端一致，后续游戏更新直接对照远端固定提交的 README 和核心代码。
 
 | 项目 | 核对版本 | 本次内容调整 |
 | --- | --- | --- |
-| 青禾校园卡管理系统 | [a3f0985](https://github.com/zlw0411-star/campus-card-system/commit/a3f098564a84985bf035d573f1e50c66987dea9b) | 待确认交易、退出恢复、账户启停；限定同标签页恢复条件 |
-| 航空订票系统 | [d2c11ff](https://github.com/zlw0411-star/air-ticket-system/commit/d2c11ff50226194267e26056ea4347407a72efbc) | 容量与价格编辑锁、已占用座位保护；区分后台查询与订单编辑 |
-| Java EE 餐饮点餐系统 | [7249236](https://github.com/zlw0411-star/java-ee/commit/7249236f1179c681484b1bdc1b1b60127969717c) | 顾客身份绑定、订单状态检查，收窄同桌合单与并发保证表述 |
-| Desktop Pet | [d08f0d9](https://github.com/zlw0411-star/desktop-pet/commit/d08f0d97743c37bb4cf9eccd1fa7e15a0b792e5f) | 三页设置、专注模式、本地模板聊天、在线停止与重试 |
-| 学习资料分析助手 | [4453453](https://github.com/zlw0411-star/cs-study-assistant/commit/44534535179e9fdad4d29ea203a29020e0574815) | 替换旧 408 定位；四格式导入、桌面/Web、离线目录与可选在线分析 |
-| 余烬试炼 | [2cf4a34](https://github.com/zlw0411-star/emberfall-arena/commit/2cf4a3430a985424effc32b4cad490c254eeb2bc) | 新增经典远程/近战刀战双模式、三刀技、近战 AI 与独立视觉反馈；仍为 1 真人 + 11 本地 AI |
+| 青禾校园卡管理系统 | [f1a1a06](https://github.com/zlw0411-star/campus-card-system/commit/f1a1a063deb353098ed45ae5cd245ba1f230d438) | 本轮只改 `tools.ps1`，未发现业务功能变化；原交易与账户边界保持 |
+| 航空订票系统 | [076986b](https://github.com/zlw0411-star/air-ticket-system/commit/076986b6260376401431cf4e7371f0462c4741fd) | JWT 密钥改用外部配置；缺失或占位密钥时拒绝启动 |
+| Java EE 餐饮点餐系统 | [aa9cd1a](https://github.com/zlw0411-star/java-ee/commit/aa9cd1afaaa50f955de574e68de4720ca6b45207) | 按当前代码补充外部令牌密钥配置；两服务缺少密钥时拒绝启动 |
+| Desktop Pet | [d08f0d9](https://github.com/zlw0411-star/desktop-pet/commit/d08f0d97743c37bb4cf9eccd1fa7e15a0b792e5f) | 未变化：三页设置、专注模式、本地模板聊天、在线停止与重试 |
+| 学习资料分析助手 | [4453453](https://github.com/zlw0411-star/cs-study-assistant/commit/44534535179e9fdad4d29ea203a29020e0574815) | 未变化：四格式导入、桌面/Web、离线目录与可选在线分析 |
+| 余烬试炼 | [06bf3d6](https://github.com/zlw0411-star/emberfall-arena/commit/06bf3d6dd71304f654431173cb8c11e4255ed0d3) | 新增首领竞伤、四张地图与新技能；保留本地单人对局边界 |
 
 ## 核对依据
 
@@ -46,6 +46,17 @@
 - 新增双模式与视觉/伤害边界的只读检查，`npm run verify:portfolio` 7/7、TypeScript、改动文件 ESLint 与生产构建通过。隔离生产构建和线上 Edge 检查均通过，并逐项核对全部八个详情的功能、实现和范围文案，包含 390px 手机无横向溢出、返回与卡片跳转；未捕获未处理 JS 异常。
 - 已发布 <https://aboutme.lingwei.workers.dev/projects/emberfall-arena>，Worker 版本 `22b75433-58b5-4279-b92d-c9f7b1b64202`。
 - 本次未运行游戏业务测试，测试源码存在不代表已通过；也未修改游戏仓库、网站数据库或个人资料。
+
+## 默认分支核对与网站更新（2026-10-19）
+
+- 校园卡仓库核对到 `f1a1a063deb353098ed45ae5cd245ba1f230d438`：提交仅调整 `tools.ps1`，未发现业务功能变化；保留已有交易恢复、账户与会话边界描述。
+- 航空订票仓库核对到 `076986b6260376401431cf4e7371f0462c4741fd`：JWT 密钥改为外部配置，缺少密钥或仍使用占位值时拒绝启动。更新配置与启动边界，不新增业务功能描述。
+- 餐饮点餐仓库核对到 `aa9cd1afaaa50f955de574e68de4720ca6b45207`：旧 SHA 比较请求返回 404，无法据此判断历史增量；按当前代码补充外部令牌密钥配置。`TokenUtil` 在密钥缺失时拒绝启动，`OrderController` 保留顾客身份与终态检查，`Repositories` 保留餐桌锁。证据见被忽略的只读核对记录 `.sites-runtime/project-refresh-2026-10-19/java/java-ee-current-code-check.md`。
+- Desktop Pet (`d08f0d97743c37bb4cf9eccd1fa7e15a0b792e5f`) 与学习资料分析助手 (`44534535179e9fdad4d29ea203a29020e0574815`) 的默认分支 SHA 与上次记录相同；本轮重新核对日期，不扩写功能。
+- 余烬试炼对照 [2cf4a34 → 06bf3d6](https://github.com/zlw0411-star/emberfall-arena/compare/2cf4a3430a985424effc32b4cad490c254eeb2bc...06bf3d6dd71304f654431173cb8c11e4255ed0d3) 与固定 HEAD 源码，补充首领竞伤、四张主题地图、闪电链/冰霜新星以及穿云刺/护体刀阵。首领模式按对首领造成的实际伤害排名，包含复活和结算；模式与技能整理到独立模块。仍为 12 人本地对局，不支持联网、账号、永久排行榜或存档。
+- 游戏仓库的修复记录 `docs/FIXES-20261019.md` 报告 24 局首领模拟均运行至 600 秒、0 局击败首领；这是仓库记录，不代表首领平衡通过。本轮未运行游戏或来源项目业务测试。
+- 作品集只读检查 7/7、TypeScript 检查、生产构建及本地 HTTP 检查 52/52 通过。线上同一 HTTP 脚本增加航空订票文案和四地图严格断言后 53/53 通过。CUA 实际点击验证了项目列表→余烬试炼详情→返回；桌面与 390px 视口下新游戏详情无横向溢出，控制台无错误。八个项目详情的覆盖是 HTTP 检查结果，不是逐页 CUA 浏览器遍历。
+- 已发布 <https://aboutme.lingwei.workers.dev/projects/emberfall-arena>，Cloudflare Worker `aboutme` 版本 `91eb65d4-a9ee-4f33-a045-f7690e222bb3`。本轮仅更新作品集文案并执行既有检查；本地与线上 Profile hash 一致，未改真实数据库、图片或账号，也未运行来源项目业务测试。
 
 ## 后续更新
 

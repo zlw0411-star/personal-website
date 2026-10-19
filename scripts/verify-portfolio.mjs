@@ -61,22 +61,24 @@ test("learning tool describes both current interfaces and optional online proces
   assert.ok(project.limitations.some(text => text.includes("全部提取文字") && text.includes("计费")));
 });
 
-test("game explicitly states local AI opponents and excludes network multiplayer", () => {
+test("game explicitly states the player and local AI scope and excludes online services", () => {
   const project = getPortfolioProject("emberfall-arena");
   assert.match(project.summary, /1 名玩家与 11 名本地 AI/);
   assert.ok(project.limitations.some(text => text.includes("不支持网络联机")));
+  assert.ok(project.limitations.some(text => text.includes("局内伤害排名")));
   assert.ok(project.limitations.some(text => text.includes("未声明开源许可证")));
 });
 
-test("game documents both combat modes without confusing visuals with damage", () => {
+test("game documents its three modes, controls, and melee damage boundary", () => {
   const project = getPortfolioProject("emberfall-arena");
-  assert.match(project.summary, /经典远程与近战刀战/);
+  assert.match(project.summary, /经典远程、近战刀战和首领竞伤/);
   const features = project.features.join("\n");
-  for (const skill of ["突进斩", "旋风斩", "重斩"]) assert.ok(features.includes(skill), skill);
-  assert.match(features, /左键点击挥刀、按住连续斩击/);
-  assert.match(features, /重开沿用当前模式/);
+  for (const skill of ["突进斩", "旋风斩", "重斩", "穿云刺", "护体刀阵"]) assert.ok(features.includes(skill), skill);
+  assert.match(features, /左键点击挥刀或按住连斩/);
+  assert.match(features, /倒下后可复活并保留成长/);
+  assert.match(features, /十分钟时限结束后结算/);
   assert.ok(project.implementation.some(item => item.description.includes("视觉余效不参与伤害")));
-  assert.ok(project.limitations.some(text => text.includes("不含翻滚、格挡、弹反或技能无敌")));
+  assert.ok(project.limitations.some(text => text.includes("不含翻滚、格挡或弹反")));
 });
 
 test("updated portfolio pages retain the plain-anchor navigation workaround", () => {
